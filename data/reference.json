@@ -1,0 +1,2486 @@
+{
+  "meta": {
+    "source_workbook": "Volatility3_Memory_Analysis_Reference.xlsx",
+    "verified_version": "2.28"
+  },
+  "windows": {
+    "phases": [
+      {
+        "name": "1. Image Identification & Triage",
+        "color": "#E0F2FE"
+      },
+      {
+        "name": "2. Processes & Threads",
+        "color": "#D1FAE5"
+      },
+      {
+        "name": "3. Network Connections",
+        "color": "#FEF3C7"
+      },
+      {
+        "name": "4. Registry Analysis",
+        "color": "#EDE9FE"
+      },
+      {
+        "name": "5. File & Disk Artifacts",
+        "color": "#F1F5F9"
+      },
+      {
+        "name": "6. Malware & Code Injection",
+        "color": "#FFE4E6"
+      },
+      {
+        "name": "7. Kernel, Drivers & Rootkits",
+        "color": "#FFEDD5"
+      },
+      {
+        "name": "8. Credentials & Secrets",
+        "color": "#CFFAFE"
+      },
+      {
+        "name": "9. Services, Tasks & Persistence",
+        "color": "#FAE8FF"
+      },
+      {
+        "name": "10. User Activity, GUI & Extraction",
+        "color": "#ECFCCB"
+      }
+    ],
+    "rows": [
+      {
+        "step": 1,
+        "phase": "1. Image Identification & Triage",
+        "plugin": "windows.info",
+        "purpose": "OS & Architecture Verification",
+        "description": "Displays OS build, architecture, kernel base, DTB and the symbol table that was resolved. Always the first command run — if this fails, no other plugin will work.",
+        "command": "vol -f mem.raw windows.info",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 2,
+        "phase": "1. Image Identification & Triage",
+        "plugin": "banners.Banners",
+        "purpose": "Raw Banner String Hunting",
+        "description": "Searches the raw image for kernel banner strings. Fallback when windows.info fails or the dump type is unknown (also used to identify Linux images).",
+        "command": "vol -f mem.raw banners.Banners",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 3,
+        "phase": "1. Image Identification & Triage",
+        "plugin": "isfinfo.IsfInfo",
+        "purpose": "Symbol Table Inventory",
+        "description": "Lists the ISF (Intermediate Symbol Format) files available to Volatility and which images they match. The go-to fix for 'symbol table not found' errors.",
+        "command": "vol isfinfo.IsfInfo",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 4,
+        "phase": "1. Image Identification & Triage",
+        "plugin": "windows.crashinfo",
+        "purpose": "Crash Dump Header Parsing",
+        "description": "Parses the header of a Windows crash dump (.dmp): build number, dump type, and physical memory run ranges.",
+        "command": "vol -f memory.dmp windows.crashinfo",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 5,
+        "phase": "1. Image Identification & Triage",
+        "plugin": "windows.kpcrs",
+        "purpose": "Per-CPU Structure Listing",
+        "description": "Prints the KPCR structure for each processor. Confirms CPU count and gives kernel structure entry points used by other plugins.",
+        "command": "vol -f mem.raw windows.kpcrs",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 6,
+        "phase": "1. Image Identification & Triage",
+        "plugin": "windows.virtmap",
+        "purpose": "Kernel Virtual Layout Mapping",
+        "description": "Lists virtual mapped sections of kernel space (paged pool, PFN database, session space) — context for interpreting kernel addresses.",
+        "command": "vol -f mem.raw windows.virtmap",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 7,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.pslist",
+        "purpose": "Active Process Listing",
+        "description": "Walks the EPROCESS doubly-linked list to enumerate running processes (PID, PPID, image name, create/exit time, offset). Baseline of every investigation.",
+        "command": "vol -f mem.raw windows.pslist",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 8,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.psscan",
+        "purpose": "Hidden/Terminated Process Hunting",
+        "description": "Pool-tag scans physical memory for EPROCESS objects independent of the linked list — surfaces terminated and DKOM-unlinked processes.",
+        "command": "vol -f mem.raw windows.psscan",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 9,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.pstree",
+        "purpose": "Process Lineage & Anomaly Detection",
+        "description": "Renders parent/child hierarchy. Key for spotting abnormal ancestry (e.g. WINWORD.EXE -> powershell.exe, or services spawned by a user process).",
+        "command": "vol -f mem.raw windows.pstree",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 10,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.malware.psxview",
+        "purpose": "Cross-View Hidden Process Detection",
+        "description": "Compares four independent process enumeration methods and flags any process missing from one of them — the classic anti-rootkit cross-view check.",
+        "command": "vol -f mem.raw windows.malware.psxview",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 11,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.cmdline",
+        "purpose": "Execution Argument Auditing",
+        "description": "Prints the command line of each process from the PEB. Reveals encoded PowerShell, LOLBin abuse, and dropped file paths.",
+        "command": "vol -f mem.raw windows.cmdline",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 12,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.envars",
+        "purpose": "Process Environment Auditing",
+        "description": "Dumps environment variables per process — exposes injected paths, proxy settings, temp staging directories, and sometimes credentials.",
+        "command": "vol -f mem.raw windows.envars --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 13,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.sessions",
+        "purpose": "Logon Session Mapping",
+        "description": "Maps processes to their logon session and user, extracted from environment data. Distinguishes console, RDP, and service sessions.",
+        "command": "vol -f mem.raw windows.sessions",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 14,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.getsids",
+        "purpose": "Process Ownership & Token SIDs",
+        "description": "Prints the SIDs owning each process — identifies privilege context and token-stealing (e.g. a user process running as SYSTEM).",
+        "command": "vol -f mem.raw windows.getsids",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 15,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.privileges",
+        "purpose": "Token Privilege Auditing",
+        "description": "Lists token privileges per process and whether each is enabled — flags SeDebugPrivilege or SeImpersonatePrivilege abuse.",
+        "command": "vol -f mem.raw windows.privileges --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 16,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.getservicesids",
+        "purpose": "Service SID Resolution",
+        "description": "Derives service SIDs and maps them to service names — links a token back to the service that owns it.",
+        "command": "vol -f mem.raw windows.getservicesids",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 17,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.joblinks",
+        "purpose": "Job Object Membership",
+        "description": "Prints job object links per process; useful for spotting sandboxed/containerised children and job-based process grouping.",
+        "command": "vol -f mem.raw windows.joblinks",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 18,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.handles",
+        "purpose": "Open Handle Inspection",
+        "description": "Lists open handles per process (files, keys, mutexes, processes, tokens). Reveals malware mutexes, opened victim processes, and staged file paths.",
+        "command": "vol -f mem.raw windows.handles --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 19,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.threads",
+        "purpose": "Thread Enumeration & Context",
+        "description": "Enumerates threads per process with start addresses — a start address outside any mapped module is a strong injection indicator.",
+        "command": "vol -f mem.raw windows.threads",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 20,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.thrdscan",
+        "purpose": "Orphan Thread Scanning",
+        "description": "Pool-scans for ETHREAD objects, including threads belonging to hidden or exited processes.",
+        "command": "vol -f mem.raw windows.thrdscan",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 21,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.suspended_threads",
+        "purpose": "Suspended Thread Detection",
+        "description": "Lists threads in a suspended state — typical of process hollowing and injection before the payload is resumed.",
+        "command": "vol -f mem.raw windows.suspended_threads",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 22,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.malware.suspicious_threads",
+        "purpose": "Anomalous Thread Start Detection",
+        "description": "Flags userland threads whose start address is unbacked, in a private region, or inconsistent with the owning module.",
+        "command": "vol -f mem.raw windows.malware.suspicious_threads",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 23,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.dlllist",
+        "purpose": "Loaded Library Inspection",
+        "description": "Lists DLLs loaded per process with their base addresses and full paths — reveals sideloaded, unsigned, or oddly-pathed modules.",
+        "command": "vol -f mem.raw windows.dlllist --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 24,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.malware.ldrmodules",
+        "purpose": "PEB Unlinking Detection",
+        "description": "Compares the three PEB module lists against the VAD tree; a module present in one but not the others indicates a manually mapped or unlinked DLL.",
+        "command": "vol -f mem.raw windows.malware.ldrmodules --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 25,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.iat",
+        "purpose": "Import Address Table Auditing",
+        "description": "Extracts the IAT of a process image to enumerate imported APIs, and to detect IAT hooking or suspicious API surface.",
+        "command": "vol -f mem.raw windows.iat --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 26,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.verinfo",
+        "purpose": "PE Version Metadata",
+        "description": "Reads version resources from mapped PE files — spot forged company/product strings on masqueraded binaries.",
+        "command": "vol -f mem.raw windows.verinfo",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 27,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.pe_symbols",
+        "purpose": "PE Symbol Resolution",
+        "description": "Resolves symbols inside PE files in process and kernel memory — used to attribute unnamed addresses to real functions.",
+        "command": "vol -f mem.raw windows.pe_symbols",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 28,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.vadinfo",
+        "purpose": "Memory Region Enumeration",
+        "description": "Lists every VAD (virtual address descriptor) with protection flags and backing file. PAGE_EXECUTE_READWRITE with no file is the injection signature.",
+        "command": "vol -f mem.raw windows.vadinfo --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 29,
+        "phase": "2. Processes & Threads",
+        "plugin": "windows.vadwalk",
+        "purpose": "VAD Tree Traversal",
+        "description": "Walks the raw VAD tree structure (parent/left/right nodes) — used to validate a tree that malfind or vadinfo could not parse cleanly.",
+        "command": "vol -f mem.raw windows.vadwalk --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 30,
+        "phase": "3. Network Connections",
+        "plugin": "windows.netscan",
+        "purpose": "Network Artifact & C2 Hunting",
+        "description": "Pool-scans for network objects: all active and closed connections for all processes, identifying foreign IPs, listening ports, owning PIDs, and timestamps. Works across all modern Windows builds.",
+        "command": "vol -f mem.raw windows.netscan",
+        "color": "#FEF3C7"
+      },
+      {
+        "step": 31,
+        "phase": "3. Network Connections",
+        "plugin": "windows.netstat",
+        "purpose": "Live Structure Network Walk",
+        "description": "Traverses the live network tracking structures instead of scanning. Fewer false positives than netscan, but misses closed connections.",
+        "command": "vol -f mem.raw windows.netstat",
+        "color": "#FEF3C7"
+      },
+      {
+        "step": 32,
+        "phase": "4. Registry Analysis",
+        "plugin": "windows.registry.hivelist",
+        "purpose": "Active Hive Mapping",
+        "description": "Lists loaded registry hives with virtual/physical offsets. Provides the --offset value other registry plugins need.",
+        "command": "vol -f mem.raw windows.registry.hivelist",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 33,
+        "phase": "4. Registry Analysis",
+        "plugin": "windows.registry.hivescan",
+        "purpose": "Unlinked/Deleted Hive Hunting",
+        "description": "Pool-scans for CMHIVE structures — finds hives unlinked from the list or belonging to unloaded user profiles.",
+        "command": "vol -f mem.raw windows.registry.hivescan",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 34,
+        "phase": "4. Registry Analysis",
+        "plugin": "windows.registry.printkey",
+        "purpose": "Registry Key & Value Reading",
+        "description": "Prints keys and values under a hive or path. The primary persistence check: Run, RunOnce, Services, Winlogon, IFEO.",
+        "command": "vol -f mem.raw windows.registry.printkey --key \"Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\"",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 35,
+        "phase": "4. Registry Analysis",
+        "plugin": "windows.registry.printkey --recurse",
+        "purpose": "Full Hive Dumping",
+        "description": "Recursively walks every key and value under a hive or subkey — the Volatility 2 hivedump equivalent. Pipe to a file; output is large.",
+        "command": "vol -f mem.raw windows.registry.printkey --offset 0xf8a000024010 --recurse",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 36,
+        "phase": "4. Registry Analysis",
+        "plugin": "windows.registry.userassist",
+        "purpose": "GUI Execution Evidence",
+        "description": "Decodes UserAssist entries — programs launched from Explorer with run counts and last-execution timestamps.",
+        "command": "vol -f mem.raw windows.registry.userassist",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 37,
+        "phase": "4. Registry Analysis",
+        "plugin": "windows.registry.amcache",
+        "purpose": "Application Execution History",
+        "description": "Parses the AmCache hive: executed binaries, full paths, SHA-1 hashes, and first-run timestamps. Strong execution evidence.",
+        "command": "vol -f mem.raw windows.registry.amcache",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 38,
+        "phase": "4. Registry Analysis",
+        "plugin": "windows.shimcachemem",
+        "purpose": "Shimcache Execution Artifacts",
+        "description": "Reads Shimcache (AppCompatCache) entries from the ahcache.sys AVL tree in memory — file paths and timestamps of executed/present binaries.",
+        "command": "vol -f mem.raw windows.shimcachemem",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 39,
+        "phase": "4. Registry Analysis",
+        "plugin": "windows.registry.getcellroutine",
+        "purpose": "Registry Hook Detection",
+        "description": "Reports hives whose GetCellRoutine handler has been hooked — a rootkit technique to hide registry content from live tools.",
+        "command": "vol -f mem.raw windows.registry.getcellroutine",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 40,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.filescan",
+        "purpose": "In-Memory File Object Scanning",
+        "description": "Pool-scans for FILE_OBJECT structures. Identifies deleted and hidden files, timestamps (created/modified/accessed), full paths, and physical memory offsets of files referenced in memory.",
+        "command": "vol -f mem.raw windows.filescan",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 41,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.dumpfiles",
+        "purpose": "Cached File Extraction",
+        "description": "Dumps cached file contents (DataSectionObject/ImageSectionObject) to disk. Use the offset from filescan, or --pid to grab a process's files.",
+        "command": "vol -f mem.raw -o ./out windows.dumpfiles --virtaddr 0xe00000123456",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 42,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.mftscan.MFTScan",
+        "purpose": "MFT Record Recovery",
+        "description": "Carves $MFT FILE records from memory: filenames, MACB timestamps, and resident attributes — timeline material without the disk image.",
+        "command": "vol -f mem.raw windows.mftscan.MFTScan",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 43,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.mftscan.ADS",
+        "purpose": "Alternate Data Stream Hunting",
+        "description": "Extracts Alternate Data Streams from carved MFT records — a classic hiding place for payloads and download markers.",
+        "command": "vol -f mem.raw windows.mftscan.ADS",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 44,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.mftscan.ResidentData",
+        "purpose": "Resident File Content Recovery",
+        "description": "Recovers the content of small files stored resident inside MFT records — often scripts, configs, and notes.",
+        "command": "vol -f mem.raw windows.mftscan.ResidentData",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 45,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.mbrscan",
+        "purpose": "Master Boot Record Scanning",
+        "description": "Scans for and parses MBR structures in memory — detects bootkits and wiper-style MBR overwrites.",
+        "command": "vol -f mem.raw windows.mbrscan",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 46,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.symlinkscan",
+        "purpose": "Object Symlink Scanning",
+        "description": "Scans for symbolic link objects in the object manager namespace — reveals device mappings and drive-letter abuse.",
+        "command": "vol -f mem.raw windows.symlinkscan",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 47,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.memmap",
+        "purpose": "Address Space Mapping / Dumping",
+        "description": "Prints the virtual-to-physical mapping of a process and, with --dump, writes the full process address space to disk.",
+        "command": "vol -f mem.raw -o ./out windows.memmap --pid 1234 --dump",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 48,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.pslist --dump",
+        "purpose": "Process Executable Extraction",
+        "description": "Rebuilds and writes each listed process image to disk — the Volatility 2 procdump equivalent. Scope with --pid or you will dump every process.",
+        "command": "vol -f mem.raw -o ./out windows.pslist --pid 1234 --dump",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 49,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.dlllist --dump",
+        "purpose": "DLL Extraction",
+        "description": "Writes listed DLLs to disk — the Volatility 2 dlldump equivalent. --name filters by regex; fails if the PE header page is not resident.",
+        "command": "vol -f mem.raw -o ./out windows.dlllist --pid 1234 --dump",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 50,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.vadinfo --dump",
+        "purpose": "Memory Region Extraction",
+        "description": "Writes selected VAD regions to disk — the Volatility 2 vaddump equivalent, and the fallback when header-based dumping fails. --maxsize caps huge regions.",
+        "command": "vol -f mem.raw -o ./out windows.vadinfo --pid 1234 --dump",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 51,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.modules --dump",
+        "purpose": "Kernel Driver Extraction",
+        "description": "Writes kernel drivers to disk — the Volatility 2 moddump equivalent. --base extracts a single driver by address.",
+        "command": "vol -f mem.raw -o ./out windows.modules --base 0xfffff88003980000 --dump",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 52,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.malware.malfind --dump",
+        "purpose": "Injected Region Extraction",
+        "description": "Extracts exactly the regions malfind flagged, one file per VAD — the fastest path from detection to a sample you can analyse.",
+        "command": "vol -f mem.raw -o ./out windows.malware.malfind --pid 1234 --dump",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 53,
+        "phase": "5. File & Disk Artifacts",
+        "plugin": "windows.truecrypt",
+        "purpose": "Encryption Passphrase Recovery",
+        "description": "Searches for cached TrueCrypt passphrases and keys left in memory by the driver.",
+        "command": "vol -f mem.raw windows.truecrypt",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 54,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.malware.malfind",
+        "purpose": "Code Injection Detection",
+        "description": "Finds private, committed VADs marked executable with no backing file, and hexdumps/disassembles the head — shellcode and injected PE headers (MZ) show up here.",
+        "command": "vol -f mem.raw windows.malware.malfind",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 55,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "yarascan.YaraScan",
+        "purpose": "Full-Image Signature Hunting",
+        "description": "Runs YARA rules across the entire memory image (kernel and user space). Broadest signature sweep; use for known-malware or flag-string hunting.",
+        "command": "vol -f mem.raw yarascan.YaraScan --yara-string \"flag{\"",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 56,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.vadyarascan",
+        "purpose": "Process-Scoped YARA Hunting",
+        "description": "Runs YARA only against process VADs, so every hit maps to a PID and region — far more actionable than a raw-image hit.",
+        "command": "vol -f mem.raw windows.vadyarascan --yara-file rules.yar",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 57,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.vadregexscan",
+        "purpose": "Process-Scoped Regex Hunting",
+        "description": "Regex search across process memory regions — good for URLs, base64 blobs, wallet addresses, and CTF flag patterns.",
+        "command": "vol -f mem.raw windows.vadregexscan --pattern \"https?://[\\\\w./-]+\"",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 58,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.malware.hollowprocesses",
+        "purpose": "Process Hollowing Detection",
+        "description": "Compares the on-disk PE backing a process against its in-memory image to detect hollowing/replacement of legitimate binaries.",
+        "command": "vol -f mem.raw windows.malware.hollowprocesses",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 59,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.malware.processghosting",
+        "purpose": "Process Ghosting Detection",
+        "description": "Flags processes whose backing FILE_OBJECT is deleted, null, or delete-on-close — the ghosting/doppelgänging family of techniques.",
+        "command": "vol -f mem.raw windows.malware.processghosting",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 60,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.malware.pebmasquerade",
+        "purpose": "Process Name Spoofing Detection",
+        "description": "Compares the image path in EPROCESS against the PEB — catches malware that rewrites its own PEB to impersonate a system binary.",
+        "command": "vol -f mem.raw windows.malware.pebmasquerade",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 61,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.malware.unhooked_system_calls",
+        "purpose": "EDR Unhooking Detection",
+        "description": "Detects ntdll.dll stubs that differ from the clean on-disk version — the signature of userland EDR unhooking.",
+        "command": "vol -f mem.raw windows.malware.unhooked_system_calls",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 62,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.malware.direct_system_calls",
+        "purpose": "Direct Syscall Detection",
+        "description": "Finds syscall stubs executed outside ntdll (Hell's Gate / SysWhispers style) used to bypass userland hooks.",
+        "command": "vol -f mem.raw windows.malware.direct_system_calls",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 63,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.malware.indirect_system_calls",
+        "purpose": "Indirect Syscall Detection",
+        "description": "Detects the indirect-syscall variant where the syscall instruction is borrowed from ntdll but reached from foreign code.",
+        "command": "vol -f mem.raw windows.malware.indirect_system_calls",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 64,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.etwpatch",
+        "purpose": "ETW Tampering Detection",
+        "description": "Identifies patched ETW functions (e.g. EtwEventWrite) used to blind telemetry before executing payloads.",
+        "command": "vol -f mem.raw windows.etwpatch",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 65,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.debugregisters",
+        "purpose": "Hardware Breakpoint Detection",
+        "description": "Inspects thread debug registers (DR0-DR7) — hardware breakpoints are used both by anti-analysis code and by hooking frameworks.",
+        "command": "vol -f mem.raw windows.debugregisters",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 66,
+        "phase": "6. Malware & Code Injection",
+        "plugin": "windows.pedump",
+        "purpose": "PE Extraction From Memory",
+        "description": "Rebuilds and dumps a PE file from a given base address in process or kernel space — how you recover the payload for static analysis.",
+        "command": "vol -f mem.raw -o ./out windows.pedump --pid 1234 --base 0x400000",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 67,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.modules",
+        "purpose": "Kernel Module Listing",
+        "description": "Walks PsLoadedModuleList to list loaded kernel drivers with base addresses and paths.",
+        "command": "vol -f mem.raw windows.modules",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 68,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.modscan",
+        "purpose": "Unlinked Kernel Module Scanning",
+        "description": "Pool-scans for kernel modules independent of the list — modules present here but absent from windows.modules are hidden.",
+        "command": "vol -f mem.raw windows.modscan",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 69,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.unloadedmodules",
+        "purpose": "Unloaded Driver History",
+        "description": "Lists recently unloaded drivers with unload timestamps — evidence of a rootkit that loaded, acted, and removed itself.",
+        "command": "vol -f mem.raw windows.unloadedmodules",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 70,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.driverscan",
+        "purpose": "Driver Object Scanning",
+        "description": "Pool-scans for DRIVER_OBJECT structures, including drivers unlinked from the standard list.",
+        "command": "vol -f mem.raw windows.driverscan",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 71,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.malware.drivermodule",
+        "purpose": "Hidden Driver Correlation",
+        "description": "Correlates driver objects with kernel modules to prove a driver is hidden — a driver object with no matching module is a rootkit indicator.",
+        "command": "vol -f mem.raw windows.malware.drivermodule",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 72,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.driverirp",
+        "purpose": "IRP Handler Hook Detection",
+        "description": "Lists the IRP dispatch table of each driver; handlers pointing outside the owning driver's range indicate IRP hooking.",
+        "command": "vol -f mem.raw windows.driverirp",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 73,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.devicetree",
+        "purpose": "Device Stack Inspection",
+        "description": "Renders drivers and their attached devices as a tree — reveals filter drivers inserted into the keyboard, disk, or network stack.",
+        "command": "vol -f mem.raw windows.devicetree",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 74,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.ssdt",
+        "purpose": "Syscall Table Hook Detection",
+        "description": "Dumps the System Service Descriptor Table and resolves each entry to its owning module; entries outside ntoskrnl/win32k are hooks.",
+        "command": "vol -f mem.raw windows.ssdt",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 75,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.callbacks",
+        "purpose": "Kernel Callback Auditing",
+        "description": "Lists kernel notification routines (process/thread/image load, registry callbacks) — both a rootkit persistence point and an EDR footprint.",
+        "command": "vol -f mem.raw windows.callbacks",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 76,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.timers",
+        "purpose": "Kernel Timer & DPC Auditing",
+        "description": "Prints kernel timers and their associated DPC routines with owning module — a stealth execution path for kernel implants.",
+        "command": "vol -f mem.raw windows.timers",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 77,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.orphan_kernel_threads",
+        "purpose": "Orphan Kernel Thread Detection",
+        "description": "Finds kernel threads whose start address maps to no loaded module — code running from unbacked kernel memory.",
+        "command": "vol -f mem.raw windows.orphan_kernel_threads",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 78,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.bigpools",
+        "purpose": "Large Pool Allocation Review",
+        "description": "Lists big page pool allocations with tags — oversized or oddly-tagged allocations often hold kernel payloads.",
+        "command": "vol -f mem.raw windows.bigpools",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 79,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.poolscanner",
+        "purpose": "Generic Pool Tag Scanning",
+        "description": "Framework-level pool scanner used by the other *scan plugins; can be pointed at arbitrary tags for custom hunting.",
+        "command": "vol -f mem.raw windows.poolscanner",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 80,
+        "phase": "7. Kernel, Drivers & Rootkits",
+        "plugin": "windows.mutantscan",
+        "purpose": "Mutex/Mutant Enumeration",
+        "description": "Scans for mutant (mutex) objects. Malware families use hardcoded mutex names as single-instance markers — excellent IOC pivot.",
+        "command": "vol -f mem.raw windows.mutantscan",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 81,
+        "phase": "8. Credentials & Secrets",
+        "plugin": "windows.registry.hashdump",
+        "purpose": "NTLM Hash Extraction",
+        "description": "Extracts local account NTLM hashes from the SAM and SYSTEM hives in memory — evidence of, or material for, credential attacks.",
+        "command": "vol -f mem.raw windows.registry.hashdump",
+        "color": "#CFFAFE"
+      },
+      {
+        "step": 82,
+        "phase": "8. Credentials & Secrets",
+        "plugin": "windows.registry.lsadump",
+        "purpose": "LSA Secret Extraction",
+        "description": "Decrypts LSA secrets from the SECURITY hive: service account passwords, cached machine secrets, DPAPI keys.",
+        "command": "vol -f mem.raw windows.registry.lsadump",
+        "color": "#CFFAFE"
+      },
+      {
+        "step": 83,
+        "phase": "8. Credentials & Secrets",
+        "plugin": "windows.registry.cachedump",
+        "purpose": "Domain Cached Credentials",
+        "description": "Dumps cached domain credential hashes (MSCache/DCC2) for users who logged in without a reachable DC.",
+        "command": "vol -f mem.raw windows.registry.cachedump",
+        "color": "#CFFAFE"
+      },
+      {
+        "step": 84,
+        "phase": "8. Credentials & Secrets",
+        "plugin": "windows.malware.skeleton_key_check",
+        "purpose": "Domain Controller Backdoor Check",
+        "description": "Checks lsass for the Skeleton Key patch, which lets an attacker authenticate as any domain user with a master password.",
+        "command": "vol -f mem.raw windows.malware.skeleton_key_check",
+        "color": "#CFFAFE"
+      },
+      {
+        "step": 85,
+        "phase": "9. Services, Tasks & Persistence",
+        "plugin": "windows.svcscan",
+        "purpose": "Service Enumeration & Anomaly Detection",
+        "description": "Scans service records: name, display name, type, state, and binary path. Identifies malicious or suspicious service configurations, modified service paths, unverified distributors, and anomalous network-triggering services; paths in temp or user directories are prime persistence findings.",
+        "command": "vol -f mem.raw windows.svcscan",
+        "color": "#FAE8FF"
+      },
+      {
+        "step": 86,
+        "phase": "9. Services, Tasks & Persistence",
+        "plugin": "windows.svclist",
+        "purpose": "List-Based Service Enumeration",
+        "description": "Enumerates services by walking the service record list rather than scanning — the clean baseline for comparison.",
+        "command": "vol -f mem.raw windows.svclist",
+        "color": "#FAE8FF"
+      },
+      {
+        "step": 87,
+        "phase": "9. Services, Tasks & Persistence",
+        "plugin": "windows.malware.svcdiff",
+        "purpose": "Hidden Service Detection",
+        "description": "Diffs list-walked services against scanned services; anything only visible to the scanner is a service hidden by a rootkit.",
+        "command": "vol -f mem.raw windows.malware.svcdiff",
+        "color": "#FAE8FF"
+      },
+      {
+        "step": 88,
+        "phase": "9. Services, Tasks & Persistence",
+        "plugin": "windows.registry.scheduled_tasks",
+        "purpose": "Scheduled Task Persistence",
+        "description": "Decodes scheduled tasks from the registry: actions, triggers, principals, and hidden-flag state. Top-tier persistence artifact.",
+        "command": "vol -f mem.raw windows.registry.scheduled_tasks",
+        "color": "#FAE8FF"
+      },
+      {
+        "step": 89,
+        "phase": "10. User Activity, GUI & Extraction",
+        "plugin": "windows.cmdscan",
+        "purpose": "Command History Recovery",
+        "description": "Recovers the command history buffers of cmd.exe (COMMAND_HISTORY), including commands typed and then cleared.",
+        "command": "vol -f mem.raw windows.cmdscan",
+        "color": "#ECFCCB"
+      },
+      {
+        "step": 90,
+        "phase": "10. User Activity, GUI & Extraction",
+        "plugin": "windows.consoles",
+        "purpose": "Console Screen Buffer Recovery",
+        "description": "Recovers full console input and output buffers — you get the attacker's commands together with the output they saw.",
+        "command": "vol -f mem.raw windows.consoles",
+        "color": "#ECFCCB"
+      },
+      {
+        "step": 91,
+        "phase": "10. User Activity, GUI & Extraction",
+        "plugin": "windows.windowstations",
+        "purpose": "Window Station Enumeration",
+        "description": "Scans for top-level window stations — the GUI containers used for session isolation and desktop hiding.",
+        "command": "vol -f mem.raw windows.windowstations",
+        "color": "#ECFCCB"
+      },
+      {
+        "step": 92,
+        "phase": "10. User Activity, GUI & Extraction",
+        "plugin": "windows.desktops",
+        "purpose": "Desktop Object Enumeration",
+        "description": "Lists desktop instances per window station; malware creates hidden desktops to run GUI apps invisibly.",
+        "command": "vol -f mem.raw windows.desktops",
+        "color": "#ECFCCB"
+      },
+      {
+        "step": 93,
+        "phase": "10. User Activity, GUI & Extraction",
+        "plugin": "windows.windows.Windows",
+        "purpose": "Window Enumeration",
+        "description": "Enumerates windows belonging to desktop instances, including titles — recovers what was on screen and by which process.",
+        "command": "vol -f mem.raw windows.windows.Windows",
+        "color": "#ECFCCB"
+      },
+      {
+        "step": 94,
+        "phase": "10. User Activity, GUI & Extraction",
+        "plugin": "windows.strings",
+        "purpose": "String-to-Process Attribution",
+        "description": "Takes output from the strings utility and maps each offset back to the owning process and virtual address — turns a raw string hit into a lead.",
+        "command": "strings -td mem.raw > s.txt; vol -f mem.raw windows.strings --strings-file s.txt",
+        "color": "#ECFCCB"
+      },
+      {
+        "step": 95,
+        "phase": "10. User Activity, GUI & Extraction",
+        "plugin": "timeliner.Timeliner",
+        "purpose": "Unified Forensic Timeline",
+        "description": "Aggregates timestamps from every plugin that produces them into one chronological timeline. Best single command for 'what happened, in order'.",
+        "command": "vol -f mem.raw timeliner.Timeliner",
+        "color": "#ECFCCB"
+      },
+      {
+        "step": 96,
+        "phase": "10. User Activity, GUI & Extraction",
+        "plugin": "layerwriter.LayerWriter",
+        "purpose": "Raw Layer Export",
+        "description": "Writes the primary memory layer out to a flat raw file — converts crash dumps, VMware, and hibernation images into raw for other tools.",
+        "command": "vol -f memory.dmp -o ./out layerwriter.LayerWriter",
+        "color": "#ECFCCB"
+      }
+    ]
+  },
+  "linux": {
+    "phases": [
+      {
+        "name": "1. Image Identification & Symbols",
+        "color": "#E0F2FE"
+      },
+      {
+        "name": "2. Processes & Threads",
+        "color": "#D1FAE5"
+      },
+      {
+        "name": "3. Network Connections",
+        "color": "#FEF3C7"
+      },
+      {
+        "name": "4. Rootkit & Hooking Detection",
+        "color": "#EDE9FE"
+      },
+      {
+        "name": "5. Files & Filesystem",
+        "color": "#F1F5F9"
+      },
+      {
+        "name": "6. Malware, Modules & Injected Code",
+        "color": "#FFE4E6"
+      },
+      {
+        "name": "7. User Activity & Credentials",
+        "color": "#FFEDD5"
+      },
+      {
+        "name": "8. Evidence Extraction & Dumping",
+        "color": "#CFFAFE"
+      },
+      {
+        "name": "9. Timelining & Framework Utilities",
+        "color": "#FAE8FF"
+      }
+    ],
+    "rows": [
+      {
+        "step": 1,
+        "phase": "1. Image Identification & Symbols",
+        "plugin": "banners.Banners",
+        "purpose": "Kernel Version Identification",
+        "description": "Extracts kernel banner strings from the image (distro, kernel version, build date, compiler). Mandatory first step: the banner tells you exactly which ISF symbol file you must build or download.",
+        "command": "vol -f mem.lime banners.Banners",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 2,
+        "phase": "1. Image Identification & Symbols",
+        "plugin": "isfinfo.IsfInfo",
+        "purpose": "Symbol Table Inventory",
+        "description": "Lists the ISF files Volatility can see and which banners they match. Use it to confirm your generated symbol file is actually being picked up.",
+        "command": "vol isfinfo.IsfInfo",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 3,
+        "phase": "1. Image Identification & Symbols",
+        "plugin": "linux.boottime",
+        "purpose": "System Boot Time",
+        "description": "Reports when the system was started — anchors every other timestamp and lets you compute uptime at capture.",
+        "command": "vol -f mem.lime linux.boottime",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 4,
+        "phase": "1. Image Identification & Symbols",
+        "plugin": "linux.vmcoreinfo",
+        "purpose": "VMCoreInfo Table Parsing",
+        "description": "Enumerates VMCOREINFO tables embedded in the image: kernel offsets, KASLR base, and structure sizes. Useful when symbols only partially resolve.",
+        "command": "vol -f mem.lime linux.vmcoreinfo",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 5,
+        "phase": "1. Image Identification & Symbols",
+        "plugin": "linux.kallsyms",
+        "purpose": "Kernel Symbol Enumeration",
+        "description": "Enumerates kernel symbols from the in-memory kallsyms table, including symbols from loaded modules. Ground truth for validating addresses seen elsewhere.",
+        "command": "vol -f mem.lime linux.kallsyms",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 6,
+        "phase": "1. Image Identification & Symbols",
+        "plugin": "linux.iomem",
+        "purpose": "Physical Memory Map",
+        "description": "Reproduces /proc/iomem — the physical address map of system RAM and device regions.",
+        "command": "vol -f mem.lime linux.iomem",
+        "color": "#E0F2FE"
+      },
+      {
+        "step": 7,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.pslist",
+        "purpose": "Active Process Listing",
+        "description": "Walks the task_struct linked list to enumerate running tasks (PID, TID, PPID, COMM, UID/GID, offset). Baseline process view.",
+        "command": "vol -f mem.lime linux.pslist",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 8,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.psscan",
+        "purpose": "Hidden/Terminated Process Hunting",
+        "description": "Scans memory for task_struct signatures independently of the linked list — reveals processes unlinked by a rootkit.",
+        "command": "vol -f mem.lime linux.psscan",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 9,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.pidhashtable",
+        "purpose": "PID Hash Table Enumeration",
+        "description": "Enumerates tasks through the kernel PID hash table — a third, independent view. Cross-compare with pslist and psscan for hidden tasks.",
+        "command": "vol -f mem.lime linux.pidhashtable",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 10,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.pstree",
+        "purpose": "Process Lineage & Anomaly Detection",
+        "description": "Renders the parent/child hierarchy. Catches shells spawned by web servers, cron-spawned implants, and reparented daemons.",
+        "command": "vol -f mem.lime linux.pstree",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 11,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.psaux",
+        "purpose": "Execution Argument Auditing",
+        "description": "Reconstructs full argv per task, like ps aux — exposes reverse-shell one-liners, curl-pipe-bash, and encoded payload arguments.",
+        "command": "vol -f mem.lime linux.psaux",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 12,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.envars",
+        "purpose": "Process Environment Auditing",
+        "description": "Dumps environment variables per process. LD_PRELOAD, HTTP_PROXY, and credentials passed via env show up here.",
+        "command": "vol -f mem.lime linux.envars --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 13,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.capabilities",
+        "purpose": "Process Capability Auditing",
+        "description": "Lists the capability sets of each task (permitted, effective, inheritable, bounding). CAP_SYS_ADMIN or CAP_SYS_MODULE on an odd process is a privilege-escalation lead.",
+        "command": "vol -f mem.lime linux.capabilities",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 14,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.malware.process_spoofing",
+        "purpose": "Process Name Spoofing Detection",
+        "description": "Compares each task's executable path against its cmdline and comm fields — catches implants masquerading as kernel threads or system daemons.",
+        "command": "vol -f mem.lime linux.malware.process_spoofing",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 15,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.kthreads",
+        "purpose": "Kernel Thread Auditing",
+        "description": "Enumerates kernel threads and their entry functions — a kthread whose function is not in a legitimate module is a kernel implant.",
+        "command": "vol -f mem.lime linux.kthreads",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 16,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.ptrace",
+        "purpose": "Debugger Attachment Detection",
+        "description": "Lists ptrace tracer/tracee relationships — reveals injection via ptrace and anti-debug self-tracing.",
+        "command": "vol -f mem.lime linux.ptrace",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 17,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.pscallstack",
+        "purpose": "Task Call Stack Reconstruction",
+        "description": "Reconstructs the kernel call stack of each task; frames resolving to unknown addresses indicate execution from hidden modules.",
+        "command": "vol -f mem.lime linux.pscallstack",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 18,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.proc.Maps",
+        "purpose": "Process Memory Map Listing",
+        "description": "Lists VMAs per process, like /proc/pid/maps: address range, permissions, and backing file. The Linux equivalent of vadinfo.",
+        "command": "vol -f mem.lime linux.proc.Maps --pid 1234",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 19,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.elfs",
+        "purpose": "Mapped ELF Enumeration",
+        "description": "Lists every memory-mapped ELF per process; --dump rebuilds them to disk for static analysis.",
+        "command": "vol -f mem.lime -o ./out linux.elfs --pid 1234 --dump",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 20,
+        "phase": "2. Processes & Threads",
+        "plugin": "linux.library_list",
+        "purpose": "Shared Library Auditing",
+        "description": "Lists shared objects loaded into each process — detects LD_PRELOAD hijacks and trojanised .so files.",
+        "command": "vol -f mem.lime linux.library_list",
+        "color": "#D1FAE5"
+      },
+      {
+        "step": 21,
+        "phase": "3. Network Connections",
+        "plugin": "linux.sockstat",
+        "purpose": "Socket & Connection Listing",
+        "description": "Enumerates sockets per task (TCP/UDP/UNIX/netlink) with local/remote addresses, state, and owning PID. Primary C2 and backdoor discovery plugin.",
+        "command": "vol -f mem.lime linux.sockstat",
+        "color": "#FEF3C7"
+      },
+      {
+        "step": 22,
+        "phase": "3. Network Connections",
+        "plugin": "linux.sockscan",
+        "purpose": "Orphan Socket Scanning",
+        "description": "Scans the memory layer for socket structures independent of the task list — finds sockets belonging to hidden or exited processes.",
+        "command": "vol -f mem.lime linux.sockscan",
+        "color": "#FEF3C7"
+      },
+      {
+        "step": 23,
+        "phase": "3. Network Connections",
+        "plugin": "linux.ip.Addr",
+        "purpose": "Interface Address Listing",
+        "description": "Lists network interfaces and their addresses, like ip addr show — including promiscuous-mode flags that suggest sniffing.",
+        "command": "vol -f mem.lime linux.ip.Addr",
+        "color": "#FEF3C7"
+      },
+      {
+        "step": 24,
+        "phase": "3. Network Connections",
+        "plugin": "linux.ip.Link",
+        "purpose": "Interface Link-Layer Listing",
+        "description": "Lists link-layer interface details, like ip link show — reveals unexpected tunnels, taps, and bridges.",
+        "command": "vol -f mem.lime linux.ip.Link",
+        "color": "#FEF3C7"
+      },
+      {
+        "step": 25,
+        "phase": "3. Network Connections",
+        "plugin": "linux.malware.netfilter",
+        "purpose": "Netfilter Hook Inspection",
+        "description": "Lists registered netfilter (iptables/nftables) hook functions; hooks owned by unknown modules are used for traffic hiding, redirection, or port-knocking triggers.",
+        "command": "vol -f mem.lime linux.malware.netfilter",
+        "color": "#FEF3C7"
+      },
+      {
+        "step": 26,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.malware.check_syscall",
+        "purpose": "Syscall Table Hook Detection",
+        "description": "Compares each syscall table entry against its expected symbol; anything pointing outside the kernel text is a hooked syscall.",
+        "command": "vol -f mem.lime linux.malware.check_syscall",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 27,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.malware.check_idt",
+        "purpose": "Interrupt Table Tampering",
+        "description": "Verifies the Interrupt Descriptor Table against known-good handlers — detects low-level interrupt hooking.",
+        "command": "vol -f mem.lime linux.malware.check_idt",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 28,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.malware.check_afinfo",
+        "purpose": "Protocol Handler Hooking",
+        "description": "Verifies af_inet/af_inet6 operation structures; hooked TCP/UDP handlers are used to hide connections from netstat-like tools.",
+        "command": "vol -f mem.lime linux.malware.check_afinfo",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 29,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.malware.check_modules",
+        "purpose": "Module List Inconsistency Check",
+        "description": "Compares the kernel module list against sysfs — a module in one and not the other has been unlinked to hide itself.",
+        "command": "vol -f mem.lime linux.malware.check_modules",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 30,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.malware.check_creds",
+        "purpose": "Credential Structure Sharing",
+        "description": "Detects processes sharing a cred structure — the fingerprint of a rootkit granting root to a chosen process.",
+        "command": "vol -f mem.lime linux.malware.check_creds",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 31,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.malware.tty_check",
+        "purpose": "TTY Hook / Keylogger Detection",
+        "description": "Checks tty receive_buf function pointers for hooks — the standard kernel keylogger technique.",
+        "command": "vol -f mem.lime linux.malware.tty_check",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 32,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.malware.keyboard_notifiers",
+        "purpose": "Keyboard Notifier Chain Audit",
+        "description": "Parses the keyboard notifier call chain; unexpected callbacks are keyloggers registered as notifiers.",
+        "command": "vol -f mem.lime linux.malware.keyboard_notifiers",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 33,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.tracing.ftrace",
+        "purpose": "Ftrace Hook Detection",
+        "description": "Detects function hooking implemented via the ftrace framework — the modern, stealthy successor to syscall table patching.",
+        "command": "vol -f mem.lime linux.tracing.ftrace",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 34,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.tracing.tracepoints",
+        "purpose": "Tracepoint Hook Detection",
+        "description": "Detects handlers attached to kernel tracepoints, another legitimate subsystem abused for stealth hooking.",
+        "command": "vol -f mem.lime linux.tracing.tracepoints",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 35,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.tracing.perf_events",
+        "purpose": "Perf Event Abuse Detection",
+        "description": "Lists perf events per process; attacker-registered events can capture data or execute callbacks without a module.",
+        "command": "vol -f mem.lime linux.tracing.perf_events",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 36,
+        "phase": "4. Rootkit & Hooking Detection",
+        "plugin": "linux.ebpf",
+        "purpose": "eBPF Program Enumeration",
+        "description": "Enumerates loaded eBPF programs and maps — increasingly the payload of choice for modern Linux rootkits and stealth C2.",
+        "command": "vol -f mem.lime linux.ebpf",
+        "color": "#EDE9FE"
+      },
+      {
+        "step": 37,
+        "phase": "5. Files & Filesystem",
+        "plugin": "linux.lsof",
+        "purpose": "Open File Descriptor Listing",
+        "description": "Lists open file descriptors per process (files, sockets, pipes, deleted files) with inode metadata — finds staged payloads and open exfil handles.",
+        "command": "vol -f mem.lime linux.lsof",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 38,
+        "phase": "5. Files & Filesystem",
+        "plugin": "linux.mountinfo",
+        "purpose": "Mounted Filesystem & Namespace Enumeration",
+        "description": "Lists mount points per mount namespace — exposes container boundaries, bind mounts of host paths, and escape indicators.",
+        "command": "vol -f mem.lime linux.mountinfo",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 39,
+        "phase": "5. Files & Filesystem",
+        "plugin": "linux.pagecache.Files",
+        "purpose": "Page Cache File Listing",
+        "description": "Lists files present in the kernel page cache, with paths and inode details — the Linux equivalent of filescan.",
+        "command": "vol -f mem.lime linux.pagecache.Files",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 40,
+        "phase": "5. Files & Filesystem",
+        "plugin": "linux.pagecache.InodePages",
+        "purpose": "Cached File Content Recovery",
+        "description": "Lists and dumps the cached pages of a specific inode — recovers file content, including deleted files still cached in RAM.",
+        "command": "vol -f mem.lime -o ./out linux.pagecache.InodePages --inode 0xffff9c0012345678 --dump",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 41,
+        "phase": "5. Files & Filesystem",
+        "plugin": "linux.pagecache.RecoverFs",
+        "purpose": "Bulk Filesystem Recovery",
+        "description": "Recovers the entire cached filesystem tree (files, directories, symlinks) into a compressed tarball. Heavy, but often yields the whole attacker toolkit.",
+        "command": "vol -f mem.lime -o ./out linux.pagecache.RecoverFs",
+        "color": "#F1F5F9"
+      },
+      {
+        "step": 42,
+        "phase": "6. Malware, Modules & Injected Code",
+        "plugin": "linux.malware.malfind",
+        "purpose": "Code Injection Detection",
+        "description": "Finds VMAs with write+execute permissions and no backing file — injected shellcode and unpacked payloads in process memory.",
+        "command": "vol -f mem.lime linux.malware.malfind",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 43,
+        "phase": "6. Malware, Modules & Injected Code",
+        "plugin": "yarascan.YaraScan",
+        "purpose": "Full-Image Signature Hunting",
+        "description": "Runs YARA rules across the whole image, kernel space included. Broadest sweep for known malware strings and flag patterns.",
+        "command": "vol -f mem.lime yarascan.YaraScan --yara-string \"flag{\"",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 44,
+        "phase": "6. Malware, Modules & Injected Code",
+        "plugin": "linux.vmayarascan",
+        "purpose": "Process-Scoped YARA Hunting",
+        "description": "Runs YARA against process VMAs so each hit maps to a PID and region — the actionable version of a raw-image hit.",
+        "command": "vol -f mem.lime linux.vmayarascan --yara-file rules.yar",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 45,
+        "phase": "6. Malware, Modules & Injected Code",
+        "plugin": "linux.vmaregexscan",
+        "purpose": "Process-Scoped Regex Hunting",
+        "description": "Regex search across process VMAs — URLs, IPs, key material, and CTF flag formats.",
+        "command": "vol -f mem.lime linux.vmaregexscan --pattern \"https?://[\\\\w./-]+\"",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 46,
+        "phase": "6. Malware, Modules & Injected Code",
+        "plugin": "linux.lsmod",
+        "purpose": "Loaded Kernel Module Listing",
+        "description": "Lists modules from the standard module list, with taint flags — the clean baseline for hidden-module comparison.",
+        "command": "vol -f mem.lime linux.lsmod",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 47,
+        "phase": "6. Malware, Modules & Injected Code",
+        "plugin": "linux.malware.hidden_modules",
+        "purpose": "Hidden Module Carving",
+        "description": "Carves module structures out of memory and reports those absent from the standard list — LKM rootkits that unlinked themselves.",
+        "command": "vol -f mem.lime linux.malware.hidden_modules",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 48,
+        "phase": "6. Malware, Modules & Injected Code",
+        "plugin": "linux.malware.modxview",
+        "purpose": "Consolidated Module Cross-View",
+        "description": "Merges lsmod, check_modules, and hidden_modules into one table with taint state — the fastest single command for module-level rootkit triage.",
+        "command": "vol -f mem.lime linux.malware.modxview",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 49,
+        "phase": "6. Malware, Modules & Injected Code",
+        "plugin": "linux.module_extract",
+        "purpose": "Kernel Module Extraction",
+        "description": "Rebuilds an ELF module from a kernel address to disk — how you recover a hidden LKM for reverse engineering.",
+        "command": "vol -f mem.lime -o ./out linux.module_extract --base 0xffffffffc0123000",
+        "color": "#FFE4E6"
+      },
+      {
+        "step": 50,
+        "phase": "7. User Activity & Credentials",
+        "plugin": "linux.bash",
+        "purpose": "Bash History Recovery",
+        "description": "Extracts in-memory bash history buffers with timestamps — direct evidence of the commands an attacker typed, including history never written to disk.",
+        "command": "vol -f mem.lime linux.bash",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 51,
+        "phase": "7. User Activity & Credentials",
+        "plugin": "linux.kmsg",
+        "purpose": "Kernel Log Buffer Reading",
+        "description": "Reads the kernel ring buffer (dmesg) — module loads, OOM kills, segfaults, and USB/device events around the incident.",
+        "command": "vol -f mem.lime linux.kmsg",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 52,
+        "phase": "7. User Activity & Credentials",
+        "plugin": "linux.graphics.fbdev",
+        "purpose": "Framebuffer Extraction",
+        "description": "Extracts framebuffer content from the fbdev subsystem — recovers what was rendered on the console screen.",
+        "command": "vol -f mem.lime -o ./out linux.graphics.fbdev",
+        "color": "#FFEDD5"
+      },
+      {
+        "step": 53,
+        "phase": "8. Evidence Extraction & Dumping",
+        "plugin": "linux.proc.Maps",
+        "purpose": "Region-Level Memory Dumping",
+        "description": "With --dump, writes selected VMAs to disk — the extraction step after malfind or a YARA hit identifies a region.",
+        "command": "vol -f mem.lime -o ./out linux.proc.Maps --pid 1234 --dump",
+        "color": "#CFFAFE"
+      },
+      {
+        "step": 54,
+        "phase": "8. Evidence Extraction & Dumping",
+        "plugin": "linux.elfs",
+        "purpose": "Process Binary Recovery",
+        "description": "With --dump, rebuilds mapped ELF images to disk, including deleted binaries still resident in memory.",
+        "command": "vol -f mem.lime -o ./out linux.elfs --pid 1234 --dump",
+        "color": "#CFFAFE"
+      },
+      {
+        "step": 55,
+        "phase": "8. Evidence Extraction & Dumping",
+        "plugin": "linux.module_extract",
+        "purpose": "Hidden Module Extraction",
+        "description": "Rebuilds a kernel module ELF from its base address — the extraction step after modxview or hidden_modules names an address.",
+        "command": "vol -f mem.lime -o ./out linux.module_extract --base 0xffffffffc0123000",
+        "color": "#CFFAFE"
+      },
+      {
+        "step": 56,
+        "phase": "8. Evidence Extraction & Dumping",
+        "plugin": "layerwriter.LayerWriter",
+        "purpose": "Raw Layer Export",
+        "description": "Writes the primary memory layer to a flat raw file — converts LiME, AVML, and crash formats for use with other tooling.",
+        "command": "vol -f mem.lime -o ./out layerwriter.LayerWriter",
+        "color": "#CFFAFE"
+      },
+      {
+        "step": 57,
+        "phase": "9. Timelining & Framework Utilities",
+        "plugin": "timeliner.Timeliner",
+        "purpose": "Unified Forensic Timeline",
+        "description": "Aggregates timestamps from every timestamp-producing Linux plugin into one chronological view — process starts, bash history, file metadata.",
+        "command": "vol -f mem.lime timeliner.Timeliner",
+        "color": "#FAE8FF"
+      },
+      {
+        "step": 58,
+        "phase": "9. Timelining & Framework Utilities",
+        "plugin": "regexscan.RegExScan",
+        "purpose": "Whole-Image Regex Search",
+        "description": "Regex search across the entire image regardless of process context — the catch-all when a scoped scan finds nothing.",
+        "command": "vol -f mem.lime regexscan.RegExScan --pattern \"flag\\\\{.*\\\\}\"",
+        "color": "#FAE8FF"
+      },
+      {
+        "step": 59,
+        "phase": "9. Timelining & Framework Utilities",
+        "plugin": "configwriter.ConfigWriter",
+        "purpose": "Analysis Configuration Export",
+        "description": "Writes the resolved configuration (layers, symbols, offsets) to JSON — makes a long analysis reproducible and shareable.",
+        "command": "vol -f mem.lime -o ./out configwriter.ConfigWriter",
+        "color": "#FAE8FF"
+      }
+    ]
+  },
+  "windows_workflow": [
+    {
+      "phase_num": "Phase 1",
+      "stage": "1. Image Identification & Triage",
+      "plugins": [
+        "windows.info",
+        "banners.Banners",
+        "isfinfo.IsfInfo",
+        "windows.crashinfo",
+        "windows.kpcrs",
+        "windows.virtmap"
+      ],
+      "objectives": "Confirm the image is parseable, identify OS build and architecture, and verify the correct symbol table loaded before anything else is trusted."
+    },
+    {
+      "phase_num": "Phase 2",
+      "stage": "2. Processes & Threads",
+      "plugins": [
+        "windows.pslist",
+        "windows.psscan",
+        "windows.pstree",
+        "windows.malware.psxview",
+        "windows.cmdline",
+        "windows.envars",
+        "windows.sessions",
+        "windows.getsids",
+        "windows.privileges",
+        "windows.getservicesids",
+        "windows.joblinks",
+        "windows.handles",
+        "windows.threads",
+        "windows.thrdscan",
+        "windows.suspended_threads",
+        "windows.malware.suspicious_threads",
+        "windows.dlllist",
+        "windows.malware.ldrmodules",
+        "windows.iat",
+        "windows.verinfo",
+        "windows.pe_symbols",
+        "windows.vadinfo",
+        "windows.vadwalk"
+      ],
+      "objectives": "Establish the process baseline, then attack it from multiple angles: hidden/unlinked processes, spoofed lineage, injected threads, unlinked DLLs, and RWX memory regions."
+    },
+    {
+      "phase_num": "Phase 3",
+      "stage": "3. Network Connections",
+      "plugins": [
+        "windows.netscan",
+        "windows.netstat"
+      ],
+      "objectives": "Recover active, closed, and listening endpoints; map outbound C2 (Command & Control) IP addresses and listening backdoors back to a specific PID and process image."
+    },
+    {
+      "phase_num": "Phase 4",
+      "stage": "4. Registry Analysis",
+      "plugins": [
+        "windows.registry.hivelist",
+        "windows.registry.hivescan",
+        "windows.registry.printkey",
+        "windows.registry.printkey --recurse",
+        "windows.registry.userassist",
+        "windows.registry.amcache",
+        "windows.shimcachemem",
+        "windows.registry.getcellroutine"
+      ],
+      "objectives": "Read persistence keys (Run, Services, Winlogon, IFEO), recover execution evidence from AmCache/Shimcache/UserAssist, and detect registry-level rootkit hooks."
+    },
+    {
+      "phase_num": "Phase 5",
+      "stage": "5. File & Disk Artifacts",
+      "plugins": [
+        "windows.filescan",
+        "windows.dumpfiles",
+        "windows.mftscan.MFTScan",
+        "windows.mftscan.ADS",
+        "windows.mftscan.ResidentData",
+        "windows.mbrscan",
+        "windows.symlinkscan",
+        "windows.memmap",
+        "windows.pslist --dump",
+        "windows.dlllist --dump",
+        "windows.vadinfo --dump",
+        "windows.modules --dump",
+        "windows.malware.malfind --dump",
+        "windows.truecrypt"
+      ],
+      "objectives": "Locate and extract files still resident in memory, recover MFT records and ADS for timeline building, and dump process address spaces for offline analysis."
+    },
+    {
+      "phase_num": "Phase 6",
+      "stage": "6. Malware & Code Injection",
+      "plugins": [
+        "windows.malware.malfind",
+        "yarascan.YaraScan",
+        "windows.vadyarascan",
+        "windows.vadregexscan",
+        "windows.malware.hollowprocesses",
+        "windows.malware.processghosting",
+        "windows.malware.pebmasquerade",
+        "windows.malware.unhooked_system_calls",
+        "windows.malware.direct_system_calls",
+        "windows.malware.indirect_system_calls",
+        "windows.etwpatch",
+        "windows.debugregisters",
+        "windows.pedump"
+      ],
+      "objectives": "Hunt injected and unbacked code, hollowed and ghosted processes, spoofed PEBs, EDR evasion via syscalls and ETW patching, and signature matches via YARA."
+    },
+    {
+      "phase_num": "Phase 7",
+      "stage": "7. Kernel, Drivers & Rootkits",
+      "plugins": [
+        "windows.modules",
+        "windows.modscan",
+        "windows.unloadedmodules",
+        "windows.driverscan",
+        "windows.malware.drivermodule",
+        "windows.driverirp",
+        "windows.devicetree",
+        "windows.ssdt",
+        "windows.callbacks",
+        "windows.timers",
+        "windows.orphan_kernel_threads",
+        "windows.bigpools",
+        "windows.poolscanner",
+        "windows.mutantscan"
+      ],
+      "objectives": "Detect kernel-mode compromise: hidden drivers and modules, SSDT/IRP hooks, malicious callbacks and timers, and code executing from unbacked kernel memory."
+    },
+    {
+      "phase_num": "Phase 8",
+      "stage": "8. Credentials & Secrets",
+      "plugins": [
+        "windows.registry.hashdump",
+        "windows.registry.lsadump",
+        "windows.registry.cachedump",
+        "windows.malware.skeleton_key_check"
+      ],
+      "objectives": "Extract NTLM hashes, LSA secrets, and cached domain credentials, and check for domain-level backdoors such as Skeleton Key."
+    },
+    {
+      "phase_num": "Phase 9",
+      "stage": "9. Services, Tasks & Persistence",
+      "plugins": [
+        "windows.svcscan",
+        "windows.svclist",
+        "windows.malware.svcdiff",
+        "windows.registry.scheduled_tasks"
+      ],
+      "objectives": "Audit services and scheduled tasks for abnormal binary paths, hidden entries visible only to scanning, and attacker-created autostart mechanisms."
+    },
+    {
+      "phase_num": "Phase 10",
+      "stage": "10. User Activity, GUI & Extraction",
+      "plugins": [
+        "windows.cmdscan",
+        "windows.consoles",
+        "windows.windowstations",
+        "windows.desktops",
+        "windows.windows.Windows",
+        "windows.strings",
+        "timeliner.Timeliner",
+        "layerwriter.LayerWriter"
+      ],
+      "objectives": "Recover typed commands and console output, reconstruct on-screen activity, attribute raw strings to processes, and build a unified timeline of the incident."
+    }
+  ],
+  "linux_workflow": [
+    {
+      "phase_num": "Phase 1",
+      "stage": "1. Image Identification & Symbols",
+      "plugins": [
+        "banners.Banners",
+        "isfinfo.IsfInfo",
+        "linux.boottime",
+        "linux.vmcoreinfo",
+        "linux.kallsyms",
+        "linux.iomem"
+      ],
+      "objectives": "Identify the exact kernel build from the banner and confirm a matching ISF symbol file is loading — on Linux, no symbols means no analysis at all."
+    },
+    {
+      "phase_num": "Phase 2",
+      "stage": "2. Processes & Threads",
+      "plugins": [
+        "linux.pslist",
+        "linux.psscan",
+        "linux.pidhashtable",
+        "linux.pstree",
+        "linux.psaux",
+        "linux.envars",
+        "linux.capabilities",
+        "linux.malware.process_spoofing",
+        "linux.kthreads",
+        "linux.ptrace",
+        "linux.pscallstack",
+        "linux.proc.Maps",
+        "linux.elfs",
+        "linux.library_list"
+      ],
+      "objectives": "Build the task baseline from three independent enumeration paths, then check argv, environment, capabilities, name spoofing, and mapped ELFs for anomalies."
+    },
+    {
+      "phase_num": "Phase 3",
+      "stage": "3. Network Connections",
+      "plugins": [
+        "linux.sockstat",
+        "linux.sockscan",
+        "linux.ip.Addr",
+        "linux.ip.Link",
+        "linux.malware.netfilter"
+      ],
+      "objectives": "Enumerate sockets per task and by scanning, review interface state for sniffing, and inspect netfilter hooks used to hide or redirect traffic."
+    },
+    {
+      "phase_num": "Phase 4",
+      "stage": "4. Rootkit & Hooking Detection",
+      "plugins": [
+        "linux.malware.check_syscall",
+        "linux.malware.check_idt",
+        "linux.malware.check_afinfo",
+        "linux.malware.check_modules",
+        "linux.malware.check_creds",
+        "linux.malware.tty_check",
+        "linux.malware.keyboard_notifiers",
+        "linux.tracing.ftrace",
+        "linux.tracing.tracepoints",
+        "linux.tracing.perf_events",
+        "linux.ebpf"
+      ],
+      "objectives": "Test every classic and modern kernel hook point: syscall table, IDT, protocol handlers, credentials, TTY, notifiers, ftrace, tracepoints, perf, and eBPF."
+    },
+    {
+      "phase_num": "Phase 5",
+      "stage": "5. Files & Filesystem",
+      "plugins": [
+        "linux.lsof",
+        "linux.mountinfo",
+        "linux.pagecache.Files",
+        "linux.pagecache.InodePages",
+        "linux.pagecache.RecoverFs"
+      ],
+      "objectives": "Recover open descriptors, mount and namespace layout for container context, and pull cached file content — up to the entire cached filesystem — out of RAM."
+    },
+    {
+      "phase_num": "Phase 6",
+      "stage": "6. Malware, Modules & Injected Code",
+      "plugins": [
+        "linux.malware.malfind",
+        "yarascan.YaraScan",
+        "linux.vmayarascan",
+        "linux.vmaregexscan",
+        "linux.lsmod",
+        "linux.malware.hidden_modules",
+        "linux.malware.modxview",
+        "linux.module_extract"
+      ],
+      "objectives": "Find injected RWX regions, match YARA signatures inside process memory, and resolve module-level rootkits by cross-viewing lsmod against carved structures."
+    },
+    {
+      "phase_num": "Phase 7",
+      "stage": "7. User Activity & Credentials",
+      "plugins": [
+        "linux.bash",
+        "linux.kmsg",
+        "linux.graphics.fbdev"
+      ],
+      "objectives": "Recover attacker-typed commands from in-memory bash history, read the kernel log for module loads and crashes, and recover console framebuffer content."
+    },
+    {
+      "phase_num": "Phase 8",
+      "stage": "8. Evidence Extraction & Dumping",
+      "plugins": [
+        "linux.proc.Maps",
+        "linux.elfs",
+        "linux.module_extract",
+        "layerwriter.LayerWriter"
+      ],
+      "objectives": "Extract the artifacts you found: specific VMAs, mapped and deleted ELF binaries, hidden kernel modules, and a flat raw copy of the memory layer."
+    },
+    {
+      "phase_num": "Phase 9",
+      "stage": "9. Timelining & Framework Utilities",
+      "plugins": [
+        "timeliner.Timeliner",
+        "regexscan.RegExScan",
+        "configwriter.ConfigWriter"
+      ],
+      "objectives": "Assemble a chronological account of the incident and preserve a reproducible configuration of how the image was parsed."
+    }
+  ],
+  "framework": [
+    {
+      "plugin": "banners.Banners",
+      "applies_to": "All",
+      "description": "Scans the image for kernel banner strings. Identifies Linux kernels and confirms Windows images when info plugins fail.",
+      "command": "vol -f mem.raw banners.Banners"
+    },
+    {
+      "plugin": "isfinfo.IsfInfo",
+      "applies_to": "All",
+      "description": "Reports available ISF symbol files and which images they match. First stop for symbol resolution failures.",
+      "command": "vol isfinfo.IsfInfo"
+    },
+    {
+      "plugin": "yarascan.YaraScan",
+      "applies_to": "All",
+      "description": "YARA scanning across the full memory image, independent of OS and process context.",
+      "command": "vol -f mem.raw yarascan.YaraScan --yara-file rules.yar"
+    },
+    {
+      "plugin": "regexscan.RegExScan",
+      "applies_to": "All",
+      "description": "Regex scanning across the full image — useful for flags, URLs, emails, and key material.",
+      "command": "vol -f mem.raw regexscan.RegExScan --pattern \"flag\\{.*\\}\""
+    },
+    {
+      "plugin": "timeliner.Timeliner",
+      "applies_to": "All",
+      "description": "Aggregates timestamps from all timestamp-producing plugins into one sortable timeline.",
+      "command": "vol -f mem.raw -r csv timeliner.Timeliner > timeline.csv"
+    },
+    {
+      "plugin": "layerwriter.LayerWriter",
+      "applies_to": "All",
+      "description": "Writes the primary memory layer to a flat raw file — format conversion for third-party tools.",
+      "command": "vol -f memory.dmp -o ./out layerwriter.LayerWriter"
+    },
+    {
+      "plugin": "configwriter.ConfigWriter",
+      "applies_to": "All",
+      "description": "Exports the resolved analysis configuration (layers, symbols, offsets) as JSON for reproducibility.",
+      "command": "vol -f mem.raw -o ./out configwriter.ConfigWriter"
+    },
+    {
+      "plugin": "frameworkinfo.FrameworkInfo",
+      "applies_to": "All",
+      "description": "Lists the framework's own components: layers, symbol tables, automagic modules, and available plugins.",
+      "command": "vol frameworkinfo.FrameworkInfo"
+    },
+    {
+      "plugin": "volshell.py",
+      "applies_to": "All",
+      "description": "Not a plugin — a second entry point shipped beside vol.py. Drops you into a Python shell with the image loaded so you can walk structures directly (ps(), dt('_EPROCESS'), db(addr)). This is how you answer questions no plugin covers.",
+      "command": "python3 volshell.py -f mem.raw -w"
+    },
+    {
+      "plugin": "vmscan.Vmscan",
+      "applies_to": "All",
+      "description": "Scans for virtual machine host/guest structures inside a hypervisor memory image (nested memory analysis).",
+      "command": "vol -f host.raw vmscan.Vmscan"
+    }
+  ],
+  "triage": [
+    {
+      "area": "Process listing",
+      "look_for": "Processes with 0 threads, 0 handles, or a populated Exit time",
+      "why": "They are terminated but still linked in the active list. Not a rootkit finding — a common false lead for beginners."
+    },
+    {
+      "area": "Process listing",
+      "look_for": "System (PID 4) and smss.exe with no Session ID",
+      "why": "Expected, not an anomaly: System starts before sessions exist and smss.exe is the session manager itself."
+    },
+    {
+      "area": "Process listing",
+      "look_for": "Processes present in psscan but absent from pslist",
+      "why": "Either terminated, or unlinked from the EPROCESS list by DKOM. Check the Exit time before calling it a rootkit."
+    },
+    {
+      "area": "Process listing",
+      "look_for": "Processes in pslist but not psscan",
+      "why": "Usually pool memory reuse or a scanning miss — the list view is generally the more reliable of the two for live processes."
+    },
+    {
+      "area": "Process lineage",
+      "look_for": "svchost.exe whose parent is not services.exe, or with no -k argument in its command line",
+      "why": "The single highest-yield Windows anomaly. Legitimate svchost is always services-spawned and always has a -k service group."
+    },
+    {
+      "area": "Process lineage",
+      "look_for": "csrss.exe and wininit.exe showing a PPID that no longer exists",
+      "why": "Normal: their parent smss.exe exits after boot. Orphaned PPID alone is not suspicious for these."
+    },
+    {
+      "area": "Process lineage",
+      "look_for": "Office, browser, or Acrobat processes with a shell or script host child",
+      "why": "WINWORD.EXE spawning powershell.exe, cmd.exe or wscript.exe is the classic initial-access pattern."
+    },
+    {
+      "area": "Image paths",
+      "look_for": "A system binary name running from anywhere other than System32 or SysWOW64",
+      "why": "Masquerading is cheap and common. Always compare the path, not just the process name."
+    },
+    {
+      "area": "VAD protections",
+      "look_for": "PAGE_NOACCESS in vadinfo output",
+      "why": "vadinfo reports the ORIGINAL protection from the first allocation, not the current one. A region shown as NOACCESS may still be executable now."
+    },
+    {
+      "area": "malfind",
+      "look_for": "RWX private VADs containing an MZ header",
+      "why": "An injected PE. Regions with no MZ but valid-looking instructions are shellcode — disassemble before concluding."
+    },
+    {
+      "area": "malfind",
+      "look_for": "Dozens of RWX hits in browsers, .NET, or Java processes",
+      "why": "JIT compilers allocate RWX legitimately. malfind is a lead generator, not a verdict; correlate with thread start addresses and module backing."
+    },
+    {
+      "area": "DLL listing",
+      "look_for": "A Wow64 process showing very few DLLs",
+      "why": "The PEB lists are truncated for Wow64. Use windows.malware.ldrmodules instead of dlllist for 32-bit processes on 64-bit systems."
+    },
+    {
+      "area": "Threads",
+      "look_for": "Thread start addresses that map to no loaded module",
+      "why": "Stronger evidence than malfind alone: code executing from unbacked memory. windows.malware.suspicious_threads automates this check."
+    },
+    {
+      "area": "Network",
+      "look_for": "Endpoints whose owning PID does not appear in any process listing",
+      "why": "Either a hidden process or a stale pool artifact. netscan is a scanner, so corrupt and historical entries are expected."
+    },
+    {
+      "area": "Network",
+      "look_for": "netscan returning nothing on a busy system",
+      "why": "Try --include-corrupt to relax validation, and cross-check with windows.netstat, which walks live structures instead."
+    },
+    {
+      "area": "Command history",
+      "look_for": "cmdscan showing fewer commands than expected",
+      "why": "The default MaxHistory is 50 and is user-configurable via HKCU\\Console\\HistoryBufferSize. Use --max-history and prefer consoles, which returns output as well as input."
+    },
+    {
+      "area": "Handles",
+      "look_for": "Unusual named mutexes",
+      "why": "Malware families use hardcoded mutex names as single-instance markers — one of the best pivots from a memory image to threat-intel attribution."
+    },
+    {
+      "area": "Scanning generally",
+      "look_for": "Any *scan plugin result",
+      "why": "Scanners find objects in pool memory that may be freed, reused, or partially overwritten. A hit proves the object existed at some point, not that it was live at capture time."
+    },
+    {
+      "area": "Extraction",
+      "look_for": "Dumping fails with a paged-out header",
+      "why": "If the page holding the PE header is not resident, pedump and dlllist --dump fail. Fall back to vadinfo --dump and rebuild the header manually."
+    },
+    {
+      "area": "Timestamps",
+      "look_for": "All plugin timestamps",
+      "why": "Volatility reports UTC. Reconcile against the system time zone before building a timeline or correlating with logs."
+    },
+    {
+      "area": "Acquisition",
+      "look_for": "Structures that contradict each other",
+      "why": "A dump taken over minutes on a live system is not an atomic snapshot. Smear produces genuinely inconsistent structures — do not force a rootkit narrative onto it."
+    },
+    {
+      "area": "Linux symbols",
+      "look_for": "Plugins returning empty tables rather than errors",
+      "why": "A near-match ISF file is worse than none: offsets resolve to garbage and output looks plausible but is wrong. Confirm the banner matches your symbol file exactly."
+    },
+    {
+      "area": "Linux processes",
+      "look_for": "Bracketed names in pslist output",
+      "why": "Those are kernel threads. Use --decorate-comm to distinguish kernel threads and user threads before treating one as anomalous."
+    },
+    {
+      "area": "Linux modules",
+      "look_for": "lsmod output that looks clean",
+      "why": "Clean lsmod means nothing on its own — it is the list a rootkit unlinks from. Run linux.malware.modxview to compare it against carved and sysfs views in one table."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "Command syntax",
+      "flag": "vol -f <image> <plugin> [options]",
+      "notes": "Volatility 3 plugin names are namespaced and case-sensitive. The entry point is `vol` (or `python3 vol.py`). Use `vol -h` for global options and `vol <plugin> -h` for plugin-specific ones."
+    },
+    {
+      "topic": "Listing plugins",
+      "flag": "vol -h",
+      "notes": "The full plugin list for your installed version is printed at the bottom of `vol -h`. Plugin sets differ between versions — always check against your own install rather than a cheat sheet."
+    },
+    {
+      "topic": "Deprecated namespaces",
+      "flag": "windows.malware.* / linux.malware.*",
+      "notes": "As of Volatility 3 v2.2x, malware-detection plugins moved into `.malware` subpackages. The old top-level names (windows.malfind, linux.check_syscall, ...) still work but print a deprecation warning. This sheet uses the new names."
+    },
+    {
+      "topic": "Windows symbols",
+      "flag": "Automatic",
+      "notes": "Windows symbol tables are downloaded automatically from the Microsoft symbol server on first use. A failure here almost always means no network access or an unsupported build."
+    },
+    {
+      "topic": "Linux symbols",
+      "flag": "dwarf2json",
+      "notes": "Linux requires an ISF file built from the exact kernel's debug symbols (`dwarf2json linux --elf vmlinux > kernel.json`), placed in `volatility3/symbols/linux/`. No matching ISF means every Linux plugin fails."
+    },
+    {
+      "topic": "Output formats",
+      "flag": "-r pretty | csv | json",
+      "notes": "`-r csv` is the fastest way to get plugin output into a spreadsheet or grep pipeline; `-r json` for scripting. Add `-q` to suppress progress output."
+    },
+    {
+      "topic": "Dumping to disk",
+      "flag": "-o <dir> --dump",
+      "notes": "The output directory flag `-o` is global and comes before the plugin name. Plugins that write files (dumpfiles, pedump, memmap, elfs, module_extract) need it."
+    },
+    {
+      "topic": "Scoping to a process",
+      "flag": "--pid <PID>",
+      "notes": "Most process plugins accept `--pid`. Scope early: running dlllist or handles across every process on a busy image is slow and noisy."
+    },
+    {
+      "topic": "Performance",
+      "flag": "Scan vs list",
+      "notes": "`*scan` plugins brute-force the physical layer and are slow but see hidden objects; list-walking plugins are fast but trust kernel structures a rootkit may have edited. Run both and diff them."
+    },
+    {
+      "topic": "Not covered here",
+      "flag": "mac.* plugins",
+      "notes": "Volatility 3 also ships a macOS plugin set (mac.pslist, mac.netstat, mac.malfind, ...). It is out of scope for this workbook and rarely used in CTF challenges."
+    },
+    {
+      "topic": "Optional dependencies",
+      "flag": "yara-python, pycryptodome, capstone",
+      "notes": "Some plugins are hidden if a dependency is missing: yarascan/vadyarascan/vmayarascan/mftscan need yara-python, the hashdump/lsadump/cachedump family needs pycryptodome, and the direct/indirect syscall plugins need capstone. If a plugin here is 'not found', install the dependency before assuming your version lacks it."
+    },
+    {
+      "topic": "Name resolution",
+      "flag": "Shorthand vs full name",
+      "notes": "The CLI accepts a shortened plugin name (windows.pslist) as long as it is unambiguous. Ambiguous prefixes are rejected: use windows.windows.Windows, since windows.windows also prefixes windows.windowstations."
+    },
+    {
+      "topic": "YARA flags",
+      "flag": "--yara-string / --yara-file",
+      "notes": "Rules are passed with --yara-string (inline), --yara-file (a .yar file), or --yara-compiled-file. Add --wide for UTF-16 strings and --insensitive for case-insensitive matching."
+    },
+    {
+      "topic": "volshell",
+      "flag": "python3 volshell.py -f <image>",
+      "notes": "Interactive structure exploration. -w / -l / -m select Windows, Linux or Mac mode; --pid sets process context. Inside: hh() for help, ps() to list processes, cc(pid=N) to change context, dt() to display a structure type, db()/dd() to dump bytes. The fastest way to learn what a plugin is actually doing."
+    },
+    {
+      "topic": "Reading Vol 2 writeups",
+      "flag": "See the translation sheet",
+      "notes": "Almost every public walkthrough uses Volatility 2 syntax with --profile=. The 'Volatility 2 to 3 Translation' sheet in this workbook maps the old commands, and flags the ones with no Volatility 3 equivalent."
+    },
+    {
+      "topic": "Version note",
+      "flag": "v2.28 (stable)",
+      "notes": "Plugin names and descriptions in this workbook were verified against the Volatility 3 stable branch, version 2.28. Older installs will lack some plugins listed here."
+    }
+  ],
+  "legend": [
+    {
+      "phase": "Phase 1",
+      "description": "Each analysis phase carries one colour across the classification and workflow sheets.",
+      "color": "#E0F2FE"
+    },
+    {
+      "phase": "Phase 2",
+      "description": null,
+      "color": "#D1FAE5"
+    },
+    {
+      "phase": "Phase 3",
+      "description": null,
+      "color": "#FEF3C7"
+    },
+    {
+      "phase": "Phase 4",
+      "description": null,
+      "color": "#EDE9FE"
+    },
+    {
+      "phase": "Phase 5",
+      "description": null,
+      "color": "#F1F5F9"
+    },
+    {
+      "phase": "Phase 6",
+      "description": null,
+      "color": "#FFE4E6"
+    },
+    {
+      "phase": "Phase 7",
+      "description": null,
+      "color": "#FFEDD5"
+    },
+    {
+      "phase": "Phase 8",
+      "description": null,
+      "color": "#CFFAFE"
+    },
+    {
+      "phase": "Phase 9",
+      "description": null,
+      "color": "#FAE8FF"
+    },
+    {
+      "phase": "Phase 10",
+      "description": null,
+      "color": "#ECFCCB"
+    }
+  ],
+  "translation": [
+    {
+      "section": "Image Identification",
+      "rows": [
+        {
+          "v2": "imageinfo",
+          "v3": "windows.info",
+          "notes": "Volatility 3 has no profiles. windows.info reads the build from symbols instead of guessing, so there is nothing to pass to a --profile flag."
+        },
+        {
+          "v2": "kdbgscan",
+          "v3": "(no equivalent)",
+          "notes": "KDBG guessing existed to fix profile mismatches. Symbol-driven analysis removes the problem; if windows.info works, the kernel was resolved correctly."
+        },
+        {
+          "v2": "kpcrscan",
+          "v3": "windows.kpcrs",
+          "notes": "Same data, no scanning needed — the KPCR is located through symbols."
+        },
+        {
+          "v2": "crashinfo",
+          "v3": "windows.crashinfo",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "hibinfo",
+          "v3": "(no equivalent)",
+          "notes": "Hibernation files are handled automatically by the layer stackers; there is no separate info plugin."
+        },
+        {
+          "v2": "imagecopy / raw2dmp",
+          "v3": "layerwriter.LayerWriter",
+          "notes": "Writes the resolved layer out as flat raw. Format conversion is now generic rather than per-format."
+        },
+        {
+          "v2": "vboxinfo / vmwareinfo / hpakinfo",
+          "v3": "(no equivalent)",
+          "notes": "VirtualBox, VMware and HPAK containers are auto-detected and stacked; you no longer inspect or convert them manually."
+        }
+      ]
+    },
+    {
+      "section": "Processes, DLLs & Threads",
+      "rows": [
+        {
+          "v2": "pslist",
+          "v3": "windows.pslist",
+          "notes": "Direct equivalent. Use --physical for physical offsets (was -P)."
+        },
+        {
+          "v2": "pstree",
+          "v3": "windows.pstree",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "psscan",
+          "v3": "windows.psscan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "psdispscan",
+          "v3": "(no equivalent)",
+          "notes": "DISPATCHER_HEADER scanning was XP-x86 only and unmaintained even in Volatility 2."
+        },
+        {
+          "v2": "psxview",
+          "v3": "windows.malware.psxview",
+          "notes": "Moved into the .malware namespace along with the rest of the detection plugins."
+        },
+        {
+          "v2": "dlllist",
+          "v3": "windows.dlllist",
+          "notes": "Direct equivalent. --pid replaces -p."
+        },
+        {
+          "v2": "dlldump",
+          "v3": "windows.dlllist --dump",
+          "notes": "No separate dump plugin — dumping is now a flag on the listing plugin. Requires the global -o output directory."
+        },
+        {
+          "v2": "ldrmodules",
+          "v3": "windows.malware.ldrmodules",
+          "notes": "Same PEB-vs-VAD cross-view, new namespace."
+        },
+        {
+          "v2": "handles",
+          "v3": "windows.handles",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "getsids",
+          "v3": "windows.getsids",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "privs",
+          "v3": "windows.privileges",
+          "notes": "Renamed. Class is Privs, module is privileges."
+        },
+        {
+          "v2": "envars",
+          "v3": "windows.envars",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "verinfo",
+          "v3": "windows.verinfo",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "enumfunc",
+          "v3": "windows.iat / windows.pe_symbols",
+          "notes": "Partial. IAT parsing and symbol resolution are split across two plugins; there is no single import/export enumerator."
+        },
+        {
+          "v2": "threads",
+          "v3": "windows.threads",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "thrdscan",
+          "v3": "windows.thrdscan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "cmdscan",
+          "v3": "windows.cmdscan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "consoles",
+          "v3": "windows.consoles",
+          "notes": "Direct equivalent — still the plugin that returns attacker input and output together."
+        }
+      ]
+    },
+    {
+      "section": "Process Memory",
+      "rows": [
+        {
+          "v2": "memmap",
+          "v3": "windows.memmap",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "memdump",
+          "v3": "windows.memmap --dump",
+          "notes": "Folded into memmap as a flag."
+        },
+        {
+          "v2": "procdump",
+          "v3": "windows.pslist --dump",
+          "notes": "Folded into pslist. For a PE at an arbitrary address use windows.pedump --base instead."
+        },
+        {
+          "v2": "vadinfo",
+          "v3": "windows.vadinfo",
+          "notes": "Direct equivalent. Still reports the ORIGINAL protection, not the current one."
+        },
+        {
+          "v2": "vadwalk",
+          "v3": "windows.vadwalk",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "vadtree",
+          "v3": "windows.vadwalk",
+          "notes": "No dedicated tree view and no Graphviz/dot output in Volatility 3."
+        },
+        {
+          "v2": "vaddump",
+          "v3": "windows.vadinfo --dump",
+          "notes": "Folded into vadinfo. --maxsize caps oversized regions."
+        },
+        {
+          "v2": "malfind",
+          "v3": "windows.malware.malfind",
+          "notes": "New namespace, and --dump now extracts the injected regions directly."
+        },
+        {
+          "v2": "evtlogs",
+          "v3": "(no equivalent)",
+          "notes": "Parsed XP/2003 binary .evt logs only. For modern .evtx, carve the files with filescan plus dumpfiles and parse them externally."
+        },
+        {
+          "v2": "iehistory",
+          "v3": "(no equivalent)",
+          "notes": "No browser-history plugin in Volatility 3. Use regex or YARA scanning over process memory instead."
+        }
+      ]
+    },
+    {
+      "section": "Kernel, Drivers & Objects",
+      "rows": [
+        {
+          "v2": "modules",
+          "v3": "windows.modules",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "modscan",
+          "v3": "windows.modscan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "moddump",
+          "v3": "windows.modules --dump",
+          "notes": "Folded into modules; --base extracts a single driver."
+        },
+        {
+          "v2": "ssdt",
+          "v3": "windows.ssdt",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "driverscan",
+          "v3": "windows.driverscan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "driverirp",
+          "v3": "windows.driverirp",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "filescan",
+          "v3": "windows.filescan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "dumpfiles",
+          "v3": "windows.dumpfiles",
+          "notes": "Equivalent, but the selector changed: --virtaddr / --physaddr replace -Q, and --filter replaces -r."
+        },
+        {
+          "v2": "mutantscan",
+          "v3": "windows.mutantscan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "symlinkscan",
+          "v3": "windows.symlinkscan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "unloadedmodules",
+          "v3": "windows.unloadedmodules",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "apihooks",
+          "v3": "(no equivalent)",
+          "notes": "No general IAT/inline hook scanner. The nearest coverage is windows.malware.unhooked_system_calls plus the direct/indirect syscall plugins."
+        },
+        {
+          "v2": "impscan",
+          "v3": "(no equivalent)",
+          "notes": "No import rebuilding. Dump with pedump and rebuild the IAT in an external tool."
+        }
+      ]
+    },
+    {
+      "section": "Networking",
+      "rows": [
+        {
+          "v2": "connections / connscan / sockets / sockscan",
+          "v3": "windows.netscan",
+          "notes": "The four XP-era plugins collapsed into one scanner covering TCP and UDP, IPv4 and IPv6, on all supported builds."
+        },
+        {
+          "v2": "netscan",
+          "v3": "windows.netscan",
+          "notes": "Direct equivalent. windows.netstat is the list-walking counterpart."
+        }
+      ]
+    },
+    {
+      "section": "Registry",
+      "rows": [
+        {
+          "v2": "hivelist",
+          "v3": "windows.registry.hivelist",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "hivescan",
+          "v3": "windows.registry.hivescan",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "printkey",
+          "v3": "windows.registry.printkey",
+          "notes": "Direct equivalent. --key takes the path, --offset scopes it to one hive."
+        },
+        {
+          "v2": "hivedump",
+          "v3": "windows.registry.printkey --recurse",
+          "notes": "No separate plugin — recursion is a flag."
+        },
+        {
+          "v2": "hashdump",
+          "v3": "windows.registry.hashdump",
+          "notes": "Moved under the registry namespace. Needs pycryptodome installed."
+        },
+        {
+          "v2": "lsadump",
+          "v3": "windows.registry.lsadump",
+          "notes": "Moved under the registry namespace."
+        },
+        {
+          "v2": "cachedump",
+          "v3": "windows.registry.cachedump",
+          "notes": "Moved under the registry namespace."
+        },
+        {
+          "v2": "userassist",
+          "v3": "windows.registry.userassist",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "shimcache",
+          "v3": "windows.shimcachemem",
+          "notes": "Renamed; reads the ahcache.sys AVL tree rather than the registry hive."
+        },
+        {
+          "v2": "getservicesids",
+          "v3": "windows.getservicesids",
+          "notes": "Direct equivalent."
+        },
+        {
+          "v2": "dumpregistry",
+          "v3": "(no equivalent)",
+          "notes": "To recover a hive file, locate it with windows.filescan and extract it with windows.dumpfiles."
+        },
+        {
+          "v2": "shellbags",
+          "v3": "(no equivalent)",
+          "notes": "Notable gap. Shellbag parsing has no Volatility 3 plugin — dump NTUSER.DAT / USRCLASS.DAT and parse offline."
+        },
+        {
+          "v2": "svcscan",
+          "v3": "windows.svcscan",
+          "notes": "Direct equivalent, plus windows.svclist and windows.malware.svcdiff for cross-view."
+        }
+      ]
+    },
+    {
+      "section": "File System & Misc",
+      "rows": [
+        {
+          "v2": "mbrparser",
+          "v3": "windows.mbrscan",
+          "notes": "Renamed."
+        },
+        {
+          "v2": "mftparser",
+          "v3": "windows.mftscan.MFTScan",
+          "notes": "Renamed. windows.mftscan.ADS and .ResidentData cover the other two views."
+        },
+        {
+          "v2": "strings",
+          "v3": "windows.strings",
+          "notes": "Direct equivalent. Still needs a strings-tool output file passed via --strings-file."
+        },
+        {
+          "v2": "timeliner",
+          "v3": "timeliner.Timeliner",
+          "notes": "Now OS-independent and lives at the top level, not under windows."
+        },
+        {
+          "v2": "volshell",
+          "v3": "volshell.py (separate entry point)",
+          "notes": "Shipped as its own script alongside vol.py, not as a plugin. See the Usage Notes sheet."
+        },
+        {
+          "v2": "bioskbd / patcher / pagecheck",
+          "v3": "(no equivalent)",
+          "notes": "Niche Volatility 2 plugins with no Volatility 3 port."
+        },
+        {
+          "v2": "linux_* / mac_*",
+          "v3": "linux.* / mac.*",
+          "notes": "The underscore naming was replaced by dotted namespaces, and Linux profiles were replaced by ISF symbol files built with dwarf2json."
+        }
+      ]
+    }
+  ]
+}
