@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usage notes &amp; legend · Volatility 3 reference</title>
+<meta name="description" content="16 usage notes and the phase colour legend used across the other pages.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="index.html">vol3-reference</a>
+  <select id="page-select" aria-label="Go to page">
+        <option value="index.html">Overview</option>
+        <option value="windows.html">Windows</option>
+        <option value="linux.html">Linux</option>
+        <option value="workflow.html">Workflow</option>
+        <option value="framework.html">Framework</option>
+        <option value="triage.html">Triage</option>
+        <option value="translation.html">Vol2 -&gt; Vol3</option>
+        <option value="notes.html" selected>Notes &amp; legend</option>
+  </select>
+</header>
+
+<div class="shell">
+  <aside class="spine">
+    <a class="brand" href="index.html">vol3-reference</a>
+    <span class="subbrand">Volatility 3 · verified v2.28</span>
+    <nav class="pages" aria-label="Sections">
+      <a href="index.html">Overview</a>
+      <a href="windows.html">Windows</a>
+      <a href="linux.html">Linux</a>
+      <a href="workflow.html">Workflow</a>
+      <a href="framework.html">Framework</a>
+      <a href="triage.html">Triage</a>
+      <a href="translation.html">Vol2 -&gt; Vol3</a>
+      <a href="notes.html" aria-current="page">Notes &amp; legend</a>
+    </nav>
+    
+  </aside>
+
+  <main id="main">
+    <h1>Usage notes &amp; legend</h1>
+    <p class="dek">16 usage notes and the phase colour legend used across the other pages.</p>
+    <h2 id="usage-notes">Usage notes</h2>
+    <table>
+      <thead><tr><th>Topic</th><th>Flag / syntax</th><th>Notes</th></tr></thead>
+      <tbody>
+      <tr><td>Command syntax</td><td><code>vol -f &lt;image&gt; &lt;plugin&gt; [options]</code></td><td>Volatility 3 plugin names are namespaced and case-sensitive. The entry point is `vol` (or `python3 vol.py`). Use `vol -h` for global options and `vol &lt;plugin&gt; -h` for plugin-specific ones.</td></tr>
+      <tr><td>Listing plugins</td><td><code>vol -h</code></td><td>The full plugin list for your installed version is printed at the bottom of `vol -h`. Plugin sets differ between versions — always check against your own install rather than a cheat sheet.</td></tr>
+      <tr><td>Deprecated namespaces</td><td><code>windows.malware.* / linux.malware.*</code></td><td>As of Volatility 3 v2.2x, malware-detection plugins moved into `.malware` subpackages. The old top-level names (windows.malfind, linux.check_syscall, ...) still work but print a deprecation warning. This sheet uses the new names.</td></tr>
+      <tr><td>Windows symbols</td><td><code>Automatic</code></td><td>Windows symbol tables are downloaded automatically from the Microsoft symbol server on first use. A failure here almost always means no network access or an unsupported build.</td></tr>
+      <tr><td>Linux symbols</td><td><code>dwarf2json</code></td><td>Linux requires an ISF file built from the exact kernel&#x27;s debug symbols (`dwarf2json linux --elf vmlinux &gt; kernel.json`), placed in `volatility3/symbols/linux/`. No matching ISF means every Linux plugin fails.</td></tr>
+      <tr><td>Output formats</td><td><code>-r pretty | csv | json</code></td><td>`-r csv` is the fastest way to get plugin output into a spreadsheet or grep pipeline; `-r json` for scripting. Add `-q` to suppress progress output.</td></tr>
+      <tr><td>Dumping to disk</td><td><code>-o &lt;dir&gt; --dump</code></td><td>The output directory flag `-o` is global and comes before the plugin name. Plugins that write files (dumpfiles, pedump, memmap, elfs, module_extract) need it.</td></tr>
+      <tr><td>Scoping to a process</td><td><code>--pid &lt;PID&gt;</code></td><td>Most process plugins accept `--pid`. Scope early: running dlllist or handles across every process on a busy image is slow and noisy.</td></tr>
+      <tr><td>Performance</td><td><code>Scan vs list</code></td><td>`*scan` plugins brute-force the physical layer and are slow but see hidden objects; list-walking plugins are fast but trust kernel structures a rootkit may have edited. Run both and diff them.</td></tr>
+      <tr><td>Not covered here</td><td><code>mac.* plugins</code></td><td>Volatility 3 also ships a macOS plugin set (mac.pslist, mac.netstat, mac.malfind, ...). It is out of scope for this workbook and rarely used in CTF challenges.</td></tr>
+      <tr><td>Optional dependencies</td><td><code>yara-python, pycryptodome, capstone</code></td><td>Some plugins are hidden if a dependency is missing: yarascan/vadyarascan/vmayarascan/mftscan need yara-python, the hashdump/lsadump/cachedump family needs pycryptodome, and the direct/indirect syscall plugins need capstone. If a plugin here is &#x27;not found&#x27;, install the dependency before assuming your version lacks it.</td></tr>
+      <tr><td>Name resolution</td><td><code>Shorthand vs full name</code></td><td>The CLI accepts a shortened plugin name (windows.pslist) as long as it is unambiguous. Ambiguous prefixes are rejected: use windows.windows.Windows, since windows.windows also prefixes windows.windowstations.</td></tr>
+      <tr><td>YARA flags</td><td><code>--yara-string / --yara-file</code></td><td>Rules are passed with --yara-string (inline), --yara-file (a .yar file), or --yara-compiled-file. Add --wide for UTF-16 strings and --insensitive for case-insensitive matching.</td></tr>
+      <tr><td>volshell</td><td><code>python3 volshell.py -f &lt;image&gt;</code></td><td>Interactive structure exploration. -w / -l / -m select Windows, Linux or Mac mode; --pid sets process context. Inside: hh() for help, ps() to list processes, cc(pid=N) to change context, dt() to display a structure type, db()/dd() to dump bytes. The fastest way to learn what a plugin is actually doing.</td></tr>
+      <tr><td>Reading Vol 2 writeups</td><td><code>See the translation sheet</code></td><td>Almost every public walkthrough uses Volatility 2 syntax with --profile=. The &#x27;Volatility 2 to 3 Translation&#x27; sheet in this workbook maps the old commands, and flags the ones with no Volatility 3 equivalent.</td></tr>
+      <tr><td>Version note</td><td><code>v2.28 (stable)</code></td><td>Plugin names and descriptions in this workbook were verified against the Volatility 3 stable branch, version 2.28. Older installs will lack some plugins listed here.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="legend">Legend -- phase colour bands</h2>
+    <p>Each analysis phase carries one colour across the classification and workflow pages, shown here
+    as a left rule rather than a filled row.</p>
+    <table>
+      <thead><tr><th>Phase</th><th>Name</th></tr></thead>
+      <tbody>
+      <tr><td style="border-left:1rem solid #E0F2FE; padding-left:0.6rem">Phase 1</td><td>1. Image Identification &amp; Triage</td></tr><tr><td style="border-left:1rem solid #D1FAE5; padding-left:0.6rem">Phase 2</td><td>2. Processes &amp; Threads</td></tr><tr><td style="border-left:1rem solid #FEF3C7; padding-left:0.6rem">Phase 3</td><td>3. Network Connections</td></tr><tr><td style="border-left:1rem solid #EDE9FE; padding-left:0.6rem">Phase 4</td><td>4. Registry Analysis</td></tr><tr><td style="border-left:1rem solid #F1F5F9; padding-left:0.6rem">Phase 5</td><td>5. File &amp; Disk Artifacts</td></tr><tr><td style="border-left:1rem solid #FFE4E6; padding-left:0.6rem">Phase 6</td><td>6. Malware &amp; Code Injection</td></tr><tr><td style="border-left:1rem solid #FFEDD5; padding-left:0.6rem">Phase 7</td><td>7. Kernel, Drivers &amp; Rootkits</td></tr><tr><td style="border-left:1rem solid #CFFAFE; padding-left:0.6rem">Phase 8</td><td>8. Credentials &amp; Secrets</td></tr><tr><td style="border-left:1rem solid #FAE8FF; padding-left:0.6rem">Phase 9</td><td>9. Services, Tasks &amp; Persistence</td></tr><tr><td style="border-left:1rem solid #ECFCCB; padding-left:0.6rem">Phase 10</td><td>10. User Activity, GUI &amp; Extraction</td></tr>
+      </tbody>
+    </table>
+    <footer class="page-footer">
+      <p>Reference content verified against Volatility 3 stable v2.28 (2026-08-28), CC BY 4.0, Mousa Mohamed.
+      Not affiliated with or endorsed by the Volatility Foundation. Source: <a href="Volatility3_Memory_Analysis_Reference.xlsx">Volatility3_Memory_Analysis_Reference.xlsx</a> ·
+      <a href="https://github.com/theonlymosmos/Mousa-Analyzing-Memory">github.com/theonlymosmos/Mousa-Analyzing-Memory</a></p>
+    </footer>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

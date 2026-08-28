@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windows plugins · Volatility 3 reference</title>
+<meta name="description" content="All 96 Windows plugins from the workbook, grouped by the 10-phase analysis workflow, with a runnable example command for each.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="index.html">vol3-reference</a>
+  <select id="page-select" aria-label="Go to page">
+        <option value="index.html">Overview</option>
+        <option value="windows.html" selected>Windows</option>
+        <option value="linux.html">Linux</option>
+        <option value="workflow.html">Workflow</option>
+        <option value="framework.html">Framework</option>
+        <option value="triage.html">Triage</option>
+        <option value="translation.html">Vol2 -&gt; Vol3</option>
+        <option value="notes.html">Notes &amp; legend</option>
+  </select>
+</header>
+
+<div class="shell">
+  <aside class="spine">
+    <a class="brand" href="index.html">vol3-reference</a>
+    <span class="subbrand">Volatility 3 · verified v2.28</span>
+    <nav class="pages" aria-label="Sections">
+      <a href="index.html">Overview</a>
+      <a href="windows.html" aria-current="page">Windows</a>
+      <a href="linux.html">Linux</a>
+      <a href="workflow.html">Workflow</a>
+      <a href="framework.html">Framework</a>
+      <a href="triage.html">Triage</a>
+      <a href="translation.html">Vol2 -&gt; Vol3</a>
+      <a href="notes.html">Notes &amp; legend</a>
+    </nav>
+    <ul class="phase-list">
+        <li><a href="#1-image-identification-triage">1. Image Identification &amp; Triage</a></li><li><a href="#2-processes-threads">2. Processes &amp; Threads</a></li><li><a href="#3-network-connections">3. Network Connections</a></li><li><a href="#4-registry-analysis">4. Registry Analysis</a></li><li><a href="#5-file-disk-artifacts">5. File &amp; Disk Artifacts</a></li><li><a href="#6-malware-code-injection">6. Malware &amp; Code Injection</a></li><li><a href="#7-kernel-drivers-rootkits">7. Kernel, Drivers &amp; Rootkits</a></li><li><a href="#8-credentials-secrets">8. Credentials &amp; Secrets</a></li><li><a href="#9-services-tasks-persistence">9. Services, Tasks &amp; Persistence</a></li><li><a href="#10-user-activity-gui-extraction">10. User Activity, GUI &amp; Extraction</a></li>
+      </ul>
+  </aside>
+
+  <main id="main">
+    <h1>Windows plugins</h1>
+    <p class="dek">All 96 Windows plugins from the workbook, grouped by the 10-phase analysis workflow, with a runnable example command for each.</p>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <input id="filter-input" type="text" placeholder="Filter Windows plugins ( / to focus, Esc to clear )" autocomplete="off">
+        <span id="filter-count"></span>
+      </div>
+      <div class="phase-toggles" role="group" aria-label="Filter by phase">
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="1-image-identification-triage">1. Image Identification &amp; Triage</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="2-processes-threads">2. Processes &amp; Threads</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="3-network-connections">3. Network Connections</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="4-registry-analysis">4. Registry Analysis</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="5-file-disk-artifacts">5. File &amp; Disk Artifacts</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="6-malware-code-injection">6. Malware &amp; Code Injection</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="7-kernel-drivers-rootkits">7. Kernel, Drivers &amp; Rootkits</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="8-credentials-secrets">8. Credentials &amp; Secrets</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="9-services-tasks-persistence">9. Services, Tasks &amp; Persistence</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="10-user-activity-gui-extraction">10. User Activity, GUI &amp; Extraction</button>
+      </div>
+    </div>
+    <section class="phase-section" id="1-image-identification-triage">
+      <h2>1. Image Identification &amp; Triage <span class="phase-count">6 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.info" data-phase-key="1-image-identification-triage">
+        <div class="step">01</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.info">windows.info</a>
+          <p class="purpose">OS &amp; Architecture Verification</p>
+          <p class="desc">Displays OS build, architecture, kernel base, DTB and the symbol table that was resolved. Always the first command run — if this fails, no other plugin will work.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-info">vol -f mem.raw windows.info</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-info">Copy</button></div>
+      </div>
+      <div class="row" id="banners.Banners" data-phase-key="1-image-identification-triage">
+        <div class="step">02</div>
+        <div class="col-main">
+          <a class="plugin" href="#banners.Banners">banners.Banners</a>
+          <p class="purpose">Raw Banner String Hunting</p>
+          <p class="desc">Searches the raw image for kernel banner strings. Fallback when windows.info fails or the dump type is unknown (also used to identify Linux images).</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-banners-banners">vol -f mem.raw banners.Banners</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-banners-banners">Copy</button></div>
+      </div>
+      <div class="row" id="isfinfo.IsfInfo" data-phase-key="1-image-identification-triage">
+        <div class="step">03</div>
+        <div class="col-main">
+          <a class="plugin" href="#isfinfo.IsfInfo">isfinfo.IsfInfo</a>
+          <p class="purpose">Symbol Table Inventory</p>
+          <p class="desc">Lists the ISF (Intermediate Symbol Format) files available to Volatility and which images they match. The go-to fix for &#x27;symbol table not found&#x27; errors.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-isfinfo-isfinfo">vol isfinfo.IsfInfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-isfinfo-isfinfo">Copy</button></div>
+      </div>
+      <div class="row" id="windows.crashinfo" data-phase-key="1-image-identification-triage">
+        <div class="step">04</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.crashinfo">windows.crashinfo</a>
+          <p class="purpose">Crash Dump Header Parsing</p>
+          <p class="desc">Parses the header of a Windows crash dump (.dmp): build number, dump type, and physical memory run ranges.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-memory-dmp-windows-crashinfo">vol -f memory.dmp windows.crashinfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-memory-dmp-windows-crashinfo">Copy</button></div>
+      </div>
+      <div class="row" id="windows.kpcrs" data-phase-key="1-image-identification-triage">
+        <div class="step">05</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.kpcrs">windows.kpcrs</a>
+          <p class="purpose">Per-CPU Structure Listing</p>
+          <p class="desc">Prints the KPCR structure for each processor. Confirms CPU count and gives kernel structure entry points used by other plugins.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-kpcrs">vol -f mem.raw windows.kpcrs</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-kpcrs">Copy</button></div>
+      </div>
+      <div class="row" id="windows.virtmap" data-phase-key="1-image-identification-triage">
+        <div class="step">06</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.virtmap">windows.virtmap</a>
+          <p class="purpose">Kernel Virtual Layout Mapping</p>
+          <p class="desc">Lists virtual mapped sections of kernel space (paged pool, PFN database, session space) — context for interpreting kernel addresses.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-virtmap">vol -f mem.raw windows.virtmap</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-virtmap">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="2-processes-threads">
+      <h2>2. Processes &amp; Threads <span class="phase-count">23 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.pslist" data-phase-key="2-processes-threads">
+        <div class="step">07</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.pslist">windows.pslist</a>
+          <p class="purpose">Active Process Listing</p>
+          <p class="desc">Walks the EPROCESS doubly-linked list to enumerate running processes (PID, PPID, image name, create/exit time, offset). Baseline of every investigation.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-pslist">vol -f mem.raw windows.pslist</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-pslist">Copy</button></div>
+      </div>
+      <div class="row" id="windows.psscan" data-phase-key="2-processes-threads">
+        <div class="step">08</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.psscan">windows.psscan</a>
+          <p class="purpose">Hidden/Terminated Process Hunting</p>
+          <p class="desc">Pool-tag scans physical memory for EPROCESS objects independent of the linked list — surfaces terminated and DKOM-unlinked processes.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-psscan">vol -f mem.raw windows.psscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-psscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.pstree" data-phase-key="2-processes-threads">
+        <div class="step">09</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.pstree">windows.pstree</a>
+          <p class="purpose">Process Lineage &amp; Anomaly Detection</p>
+          <p class="desc">Renders parent/child hierarchy. Key for spotting abnormal ancestry (e.g. WINWORD.EXE -&gt; powershell.exe, or services spawned by a user process).</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-pstree">vol -f mem.raw windows.pstree</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-pstree">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.psxview" data-phase-key="2-processes-threads">
+        <div class="step">10</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.psxview">windows.malware.psxview</a>
+          <p class="purpose">Cross-View Hidden Process Detection</p>
+          <p class="desc">Compares four independent process enumeration methods and flags any process missing from one of them — the classic anti-rootkit cross-view check.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-psxview">vol -f mem.raw windows.malware.psxview</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-psxview">Copy</button></div>
+      </div>
+      <div class="row" id="windows.cmdline" data-phase-key="2-processes-threads">
+        <div class="step">11</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.cmdline">windows.cmdline</a>
+          <p class="purpose">Execution Argument Auditing</p>
+          <p class="desc">Prints the command line of each process from the PEB. Reveals encoded PowerShell, LOLBin abuse, and dropped file paths.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-cmdline">vol -f mem.raw windows.cmdline</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-cmdline">Copy</button></div>
+      </div>
+      <div class="row" id="windows.envars" data-phase-key="2-processes-threads">
+        <div class="step">12</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.envars">windows.envars</a>
+          <p class="purpose">Process Environment Auditing</p>
+          <p class="desc">Dumps environment variables per process — exposes injected paths, proxy settings, temp staging directories, and sometimes credentials.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-envars-pid-1234">vol -f mem.raw windows.envars --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-envars-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="windows.sessions" data-phase-key="2-processes-threads">
+        <div class="step">13</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.sessions">windows.sessions</a>
+          <p class="purpose">Logon Session Mapping</p>
+          <p class="desc">Maps processes to their logon session and user, extracted from environment data. Distinguishes console, RDP, and service sessions.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-sessions">vol -f mem.raw windows.sessions</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-sessions">Copy</button></div>
+      </div>
+      <div class="row" id="windows.getsids" data-phase-key="2-processes-threads">
+        <div class="step">14</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.getsids">windows.getsids</a>
+          <p class="purpose">Process Ownership &amp; Token SIDs</p>
+          <p class="desc">Prints the SIDs owning each process — identifies privilege context and token-stealing (e.g. a user process running as SYSTEM).</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-getsids">vol -f mem.raw windows.getsids</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-getsids">Copy</button></div>
+      </div>
+      <div class="row" id="windows.privileges" data-phase-key="2-processes-threads">
+        <div class="step">15</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.privileges">windows.privileges</a>
+          <p class="purpose">Token Privilege Auditing</p>
+          <p class="desc">Lists token privileges per process and whether each is enabled — flags SeDebugPrivilege or SeImpersonatePrivilege abuse.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-privileges-pid-1234">vol -f mem.raw windows.privileges --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-privileges-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="windows.getservicesids" data-phase-key="2-processes-threads">
+        <div class="step">16</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.getservicesids">windows.getservicesids</a>
+          <p class="purpose">Service SID Resolution</p>
+          <p class="desc">Derives service SIDs and maps them to service names — links a token back to the service that owns it.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-getservicesids">vol -f mem.raw windows.getservicesids</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-getservicesids">Copy</button></div>
+      </div>
+      <div class="row" id="windows.joblinks" data-phase-key="2-processes-threads">
+        <div class="step">17</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.joblinks">windows.joblinks</a>
+          <p class="purpose">Job Object Membership</p>
+          <p class="desc">Prints job object links per process; useful for spotting sandboxed/containerised children and job-based process grouping.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-joblinks">vol -f mem.raw windows.joblinks</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-joblinks">Copy</button></div>
+      </div>
+      <div class="row" id="windows.handles" data-phase-key="2-processes-threads">
+        <div class="step">18</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.handles">windows.handles</a>
+          <p class="purpose">Open Handle Inspection</p>
+          <p class="desc">Lists open handles per process (files, keys, mutexes, processes, tokens). Reveals malware mutexes, opened victim processes, and staged file paths.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-handles-pid-1234">vol -f mem.raw windows.handles --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-handles-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="windows.threads" data-phase-key="2-processes-threads">
+        <div class="step">19</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.threads">windows.threads</a>
+          <p class="purpose">Thread Enumeration &amp; Context</p>
+          <p class="desc">Enumerates threads per process with start addresses — a start address outside any mapped module is a strong injection indicator.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-threads">vol -f mem.raw windows.threads</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-threads">Copy</button></div>
+      </div>
+      <div class="row" id="windows.thrdscan" data-phase-key="2-processes-threads">
+        <div class="step">20</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.thrdscan">windows.thrdscan</a>
+          <p class="purpose">Orphan Thread Scanning</p>
+          <p class="desc">Pool-scans for ETHREAD objects, including threads belonging to hidden or exited processes.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-thrdscan">vol -f mem.raw windows.thrdscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-thrdscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.suspended_threads" data-phase-key="2-processes-threads">
+        <div class="step">21</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.suspended_threads">windows.suspended_threads</a>
+          <p class="purpose">Suspended Thread Detection</p>
+          <p class="desc">Lists threads in a suspended state — typical of process hollowing and injection before the payload is resumed.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-suspended-threads">vol -f mem.raw windows.suspended_threads</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-suspended-threads">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.suspicious_threads" data-phase-key="2-processes-threads">
+        <div class="step">22</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.suspicious_threads">windows.malware.suspicious_threads</a>
+          <p class="purpose">Anomalous Thread Start Detection</p>
+          <p class="desc">Flags userland threads whose start address is unbacked, in a private region, or inconsistent with the owning module.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-suspicious-threads">vol -f mem.raw windows.malware.suspicious_threads</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-suspicious-threads">Copy</button></div>
+      </div>
+      <div class="row" id="windows.dlllist" data-phase-key="2-processes-threads">
+        <div class="step">23</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.dlllist">windows.dlllist</a>
+          <p class="purpose">Loaded Library Inspection</p>
+          <p class="desc">Lists DLLs loaded per process with their base addresses and full paths — reveals sideloaded, unsigned, or oddly-pathed modules.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-dlllist-pid-1234">vol -f mem.raw windows.dlllist --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-dlllist-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.ldrmodules" data-phase-key="2-processes-threads">
+        <div class="step">24</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.ldrmodules">windows.malware.ldrmodules</a>
+          <p class="purpose">PEB Unlinking Detection</p>
+          <p class="desc">Compares the three PEB module lists against the VAD tree; a module present in one but not the others indicates a manually mapped or unlinked DLL.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-ldrmodules-pid-1234">vol -f mem.raw windows.malware.ldrmodules --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-ldrmodules-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="windows.iat" data-phase-key="2-processes-threads">
+        <div class="step">25</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.iat">windows.iat</a>
+          <p class="purpose">Import Address Table Auditing</p>
+          <p class="desc">Extracts the IAT of a process image to enumerate imported APIs, and to detect IAT hooking or suspicious API surface.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-iat-pid-1234">vol -f mem.raw windows.iat --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-iat-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="windows.verinfo" data-phase-key="2-processes-threads">
+        <div class="step">26</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.verinfo">windows.verinfo</a>
+          <p class="purpose">PE Version Metadata</p>
+          <p class="desc">Reads version resources from mapped PE files — spot forged company/product strings on masqueraded binaries.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-verinfo">vol -f mem.raw windows.verinfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-verinfo">Copy</button></div>
+      </div>
+      <div class="row" id="windows.pe_symbols" data-phase-key="2-processes-threads">
+        <div class="step">27</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.pe_symbols">windows.pe_symbols</a>
+          <p class="purpose">PE Symbol Resolution</p>
+          <p class="desc">Resolves symbols inside PE files in process and kernel memory — used to attribute unnamed addresses to real functions.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-pe-symbols">vol -f mem.raw windows.pe_symbols</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-pe-symbols">Copy</button></div>
+      </div>
+      <div class="row" id="windows.vadinfo" data-phase-key="2-processes-threads">
+        <div class="step">28</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.vadinfo">windows.vadinfo</a>
+          <p class="purpose">Memory Region Enumeration</p>
+          <p class="desc">Lists every VAD (virtual address descriptor) with protection flags and backing file. PAGE_EXECUTE_READWRITE with no file is the injection signature.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-vadinfo-pid-1234">vol -f mem.raw windows.vadinfo --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-vadinfo-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="windows.vadwalk" data-phase-key="2-processes-threads">
+        <div class="step">29</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.vadwalk">windows.vadwalk</a>
+          <p class="purpose">VAD Tree Traversal</p>
+          <p class="desc">Walks the raw VAD tree structure (parent/left/right nodes) — used to validate a tree that malfind or vadinfo could not parse cleanly.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-vadwalk-pid-1234">vol -f mem.raw windows.vadwalk --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-vadwalk-pid-1234">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="3-network-connections">
+      <h2>3. Network Connections <span class="phase-count">2 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.netscan" data-phase-key="3-network-connections">
+        <div class="step">30</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.netscan">windows.netscan</a>
+          <p class="purpose">Network Artifact &amp; C2 Hunting</p>
+          <p class="desc">Pool-scans for network objects: all active and closed connections for all processes, identifying foreign IPs, listening ports, owning PIDs, and timestamps. Works across all modern Windows builds.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-netscan">vol -f mem.raw windows.netscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-netscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.netstat" data-phase-key="3-network-connections">
+        <div class="step">31</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.netstat">windows.netstat</a>
+          <p class="purpose">Live Structure Network Walk</p>
+          <p class="desc">Traverses the live network tracking structures instead of scanning. Fewer false positives than netscan, but misses closed connections.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-netstat">vol -f mem.raw windows.netstat</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-netstat">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="4-registry-analysis">
+      <h2>4. Registry Analysis <span class="phase-count">8 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.registry.hivelist" data-phase-key="4-registry-analysis">
+        <div class="step">32</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.hivelist">windows.registry.hivelist</a>
+          <p class="purpose">Active Hive Mapping</p>
+          <p class="desc">Lists loaded registry hives with virtual/physical offsets. Provides the --offset value other registry plugins need.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-hivelist">vol -f mem.raw windows.registry.hivelist</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-hivelist">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.hivescan" data-phase-key="4-registry-analysis">
+        <div class="step">33</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.hivescan">windows.registry.hivescan</a>
+          <p class="purpose">Unlinked/Deleted Hive Hunting</p>
+          <p class="desc">Pool-scans for CMHIVE structures — finds hives unlinked from the list or belonging to unloaded user profiles.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-hivescan">vol -f mem.raw windows.registry.hivescan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-hivescan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.printkey" data-phase-key="4-registry-analysis">
+        <div class="step">34</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.printkey">windows.registry.printkey</a>
+          <p class="purpose">Registry Key &amp; Value Reading</p>
+          <p class="desc">Prints keys and values under a hive or path. The primary persistence check: Run, RunOnce, Services, Winlogon, IFEO.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-printkey-key-microsoft-windows-currentversion-run">vol -f mem.raw windows.registry.printkey --key &quot;Microsoft\\Windows\\CurrentVersion\\Run&quot;</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-printkey-key-microsoft-windows-currentversion-run">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.printkey --recurse" data-phase-key="4-registry-analysis">
+        <div class="step">35</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.printkey --recurse">windows.registry.printkey --recurse</a>
+          <p class="purpose">Full Hive Dumping</p>
+          <p class="desc">Recursively walks every key and value under a hive or subkey — the Volatility 2 hivedump equivalent. Pipe to a file; output is large.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-printkey-offset-0xf8a000024010-recurse">vol -f mem.raw windows.registry.printkey --offset 0xf8a000024010 --recurse</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-printkey-offset-0xf8a000024010-recurse">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.userassist" data-phase-key="4-registry-analysis">
+        <div class="step">36</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.userassist">windows.registry.userassist</a>
+          <p class="purpose">GUI Execution Evidence</p>
+          <p class="desc">Decodes UserAssist entries — programs launched from Explorer with run counts and last-execution timestamps.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-userassist">vol -f mem.raw windows.registry.userassist</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-userassist">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.amcache" data-phase-key="4-registry-analysis">
+        <div class="step">37</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.amcache">windows.registry.amcache</a>
+          <p class="purpose">Application Execution History</p>
+          <p class="desc">Parses the AmCache hive: executed binaries, full paths, SHA-1 hashes, and first-run timestamps. Strong execution evidence.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-amcache">vol -f mem.raw windows.registry.amcache</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-amcache">Copy</button></div>
+      </div>
+      <div class="row" id="windows.shimcachemem" data-phase-key="4-registry-analysis">
+        <div class="step">38</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.shimcachemem">windows.shimcachemem</a>
+          <p class="purpose">Shimcache Execution Artifacts</p>
+          <p class="desc">Reads Shimcache (AppCompatCache) entries from the ahcache.sys AVL tree in memory — file paths and timestamps of executed/present binaries.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-shimcachemem">vol -f mem.raw windows.shimcachemem</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-shimcachemem">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.getcellroutine" data-phase-key="4-registry-analysis">
+        <div class="step">39</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.getcellroutine">windows.registry.getcellroutine</a>
+          <p class="purpose">Registry Hook Detection</p>
+          <p class="desc">Reports hives whose GetCellRoutine handler has been hooked — a rootkit technique to hide registry content from live tools.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-getcellroutine">vol -f mem.raw windows.registry.getcellroutine</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-getcellroutine">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="5-file-disk-artifacts">
+      <h2>5. File &amp; Disk Artifacts <span class="phase-count">14 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.filescan" data-phase-key="5-file-disk-artifacts">
+        <div class="step">40</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.filescan">windows.filescan</a>
+          <p class="purpose">In-Memory File Object Scanning</p>
+          <p class="desc">Pool-scans for FILE_OBJECT structures. Identifies deleted and hidden files, timestamps (created/modified/accessed), full paths, and physical memory offsets of files referenced in memory.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-filescan">vol -f mem.raw windows.filescan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-filescan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.dumpfiles" data-phase-key="5-file-disk-artifacts">
+        <div class="step">41</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.dumpfiles">windows.dumpfiles</a>
+          <p class="purpose">Cached File Extraction</p>
+          <p class="desc">Dumps cached file contents (DataSectionObject/ImageSectionObject) to disk. Use the offset from filescan, or --pid to grab a process&#x27;s files.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-windows-dumpfiles-virtaddr-0xe00000123456">vol -f mem.raw -o ./out windows.dumpfiles --virtaddr 0xe00000123456</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-windows-dumpfiles-virtaddr-0xe00000123456">Copy</button></div>
+      </div>
+      <div class="row" id="windows.mftscan.MFTScan" data-phase-key="5-file-disk-artifacts">
+        <div class="step">42</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.mftscan.MFTScan">windows.mftscan.MFTScan</a>
+          <p class="purpose">MFT Record Recovery</p>
+          <p class="desc">Carves $MFT FILE records from memory: filenames, MACB timestamps, and resident attributes — timeline material without the disk image.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-mftscan-mftscan">vol -f mem.raw windows.mftscan.MFTScan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-mftscan-mftscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.mftscan.ADS" data-phase-key="5-file-disk-artifacts">
+        <div class="step">43</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.mftscan.ADS">windows.mftscan.ADS</a>
+          <p class="purpose">Alternate Data Stream Hunting</p>
+          <p class="desc">Extracts Alternate Data Streams from carved MFT records — a classic hiding place for payloads and download markers.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-mftscan-ads">vol -f mem.raw windows.mftscan.ADS</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-mftscan-ads">Copy</button></div>
+      </div>
+      <div class="row" id="windows.mftscan.ResidentData" data-phase-key="5-file-disk-artifacts">
+        <div class="step">44</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.mftscan.ResidentData">windows.mftscan.ResidentData</a>
+          <p class="purpose">Resident File Content Recovery</p>
+          <p class="desc">Recovers the content of small files stored resident inside MFT records — often scripts, configs, and notes.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-mftscan-residentdata">vol -f mem.raw windows.mftscan.ResidentData</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-mftscan-residentdata">Copy</button></div>
+      </div>
+      <div class="row" id="windows.mbrscan" data-phase-key="5-file-disk-artifacts">
+        <div class="step">45</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.mbrscan">windows.mbrscan</a>
+          <p class="purpose">Master Boot Record Scanning</p>
+          <p class="desc">Scans for and parses MBR structures in memory — detects bootkits and wiper-style MBR overwrites.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-mbrscan">vol -f mem.raw windows.mbrscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-mbrscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.symlinkscan" data-phase-key="5-file-disk-artifacts">
+        <div class="step">46</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.symlinkscan">windows.symlinkscan</a>
+          <p class="purpose">Object Symlink Scanning</p>
+          <p class="desc">Scans for symbolic link objects in the object manager namespace — reveals device mappings and drive-letter abuse.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-symlinkscan">vol -f mem.raw windows.symlinkscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-symlinkscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.memmap" data-phase-key="5-file-disk-artifacts">
+        <div class="step">47</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.memmap">windows.memmap</a>
+          <p class="purpose">Address Space Mapping / Dumping</p>
+          <p class="desc">Prints the virtual-to-physical mapping of a process and, with --dump, writes the full process address space to disk.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-windows-memmap-pid-1234-dump">vol -f mem.raw -o ./out windows.memmap --pid 1234 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-windows-memmap-pid-1234-dump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.pslist --dump" data-phase-key="5-file-disk-artifacts">
+        <div class="step">48</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.pslist --dump">windows.pslist --dump</a>
+          <p class="purpose">Process Executable Extraction</p>
+          <p class="desc">Rebuilds and writes each listed process image to disk — the Volatility 2 procdump equivalent. Scope with --pid or you will dump every process.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-windows-pslist-pid-1234-dump">vol -f mem.raw -o ./out windows.pslist --pid 1234 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-windows-pslist-pid-1234-dump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.dlllist --dump" data-phase-key="5-file-disk-artifacts">
+        <div class="step">49</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.dlllist --dump">windows.dlllist --dump</a>
+          <p class="purpose">DLL Extraction</p>
+          <p class="desc">Writes listed DLLs to disk — the Volatility 2 dlldump equivalent. --name filters by regex; fails if the PE header page is not resident.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-windows-dlllist-pid-1234-dump">vol -f mem.raw -o ./out windows.dlllist --pid 1234 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-windows-dlllist-pid-1234-dump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.vadinfo --dump" data-phase-key="5-file-disk-artifacts">
+        <div class="step">50</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.vadinfo --dump">windows.vadinfo --dump</a>
+          <p class="purpose">Memory Region Extraction</p>
+          <p class="desc">Writes selected VAD regions to disk — the Volatility 2 vaddump equivalent, and the fallback when header-based dumping fails. --maxsize caps huge regions.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-windows-vadinfo-pid-1234-dump">vol -f mem.raw -o ./out windows.vadinfo --pid 1234 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-windows-vadinfo-pid-1234-dump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.modules --dump" data-phase-key="5-file-disk-artifacts">
+        <div class="step">51</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.modules --dump">windows.modules --dump</a>
+          <p class="purpose">Kernel Driver Extraction</p>
+          <p class="desc">Writes kernel drivers to disk — the Volatility 2 moddump equivalent. --base extracts a single driver by address.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-windows-modules-base-0xfffff88003980000-dump">vol -f mem.raw -o ./out windows.modules --base 0xfffff88003980000 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-windows-modules-base-0xfffff88003980000-dump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.malfind --dump" data-phase-key="5-file-disk-artifacts">
+        <div class="step">52</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.malfind --dump">windows.malware.malfind --dump</a>
+          <p class="purpose">Injected Region Extraction</p>
+          <p class="desc">Extracts exactly the regions malfind flagged, one file per VAD — the fastest path from detection to a sample you can analyse.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-windows-malware-malfind-pid-1234-dump">vol -f mem.raw -o ./out windows.malware.malfind --pid 1234 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-windows-malware-malfind-pid-1234-dump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.truecrypt" data-phase-key="5-file-disk-artifacts">
+        <div class="step">53</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.truecrypt">windows.truecrypt</a>
+          <p class="purpose">Encryption Passphrase Recovery</p>
+          <p class="desc">Searches for cached TrueCrypt passphrases and keys left in memory by the driver.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-truecrypt">vol -f mem.raw windows.truecrypt</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-truecrypt">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="6-malware-code-injection">
+      <h2>6. Malware &amp; Code Injection <span class="phase-count">13 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.malware.malfind" data-phase-key="6-malware-code-injection">
+        <div class="step">54</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.malfind">windows.malware.malfind</a>
+          <p class="purpose">Code Injection Detection</p>
+          <p class="desc">Finds private, committed VADs marked executable with no backing file, and hexdumps/disassembles the head — shellcode and injected PE headers (MZ) show up here.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-malfind">vol -f mem.raw windows.malware.malfind</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-malfind">Copy</button></div>
+      </div>
+      <div class="row" id="yarascan.YaraScan" data-phase-key="6-malware-code-injection">
+        <div class="step">55</div>
+        <div class="col-main">
+          <a class="plugin" href="#yarascan.YaraScan">yarascan.YaraScan</a>
+          <p class="purpose">Full-Image Signature Hunting</p>
+          <p class="desc">Runs YARA rules across the entire memory image (kernel and user space). Broadest signature sweep; use for known-malware or flag-string hunting.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-yarascan-yarascan-yara-string-flag">vol -f mem.raw yarascan.YaraScan --yara-string &quot;flag{&quot;</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-yarascan-yarascan-yara-string-flag">Copy</button></div>
+      </div>
+      <div class="row" id="windows.vadyarascan" data-phase-key="6-malware-code-injection">
+        <div class="step">56</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.vadyarascan">windows.vadyarascan</a>
+          <p class="purpose">Process-Scoped YARA Hunting</p>
+          <p class="desc">Runs YARA only against process VADs, so every hit maps to a PID and region — far more actionable than a raw-image hit.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-vadyarascan-yara-file-rules-yar">vol -f mem.raw windows.vadyarascan --yara-file rules.yar</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-vadyarascan-yara-file-rules-yar">Copy</button></div>
+      </div>
+      <div class="row" id="windows.vadregexscan" data-phase-key="6-malware-code-injection">
+        <div class="step">57</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.vadregexscan">windows.vadregexscan</a>
+          <p class="purpose">Process-Scoped Regex Hunting</p>
+          <p class="desc">Regex search across process memory regions — good for URLs, base64 blobs, wallet addresses, and CTF flag patterns.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-vadregexscan-pattern-https-w">vol -f mem.raw windows.vadregexscan --pattern &quot;https?://[\\w./-]+&quot;</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-vadregexscan-pattern-https-w">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.hollowprocesses" data-phase-key="6-malware-code-injection">
+        <div class="step">58</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.hollowprocesses">windows.malware.hollowprocesses</a>
+          <p class="purpose">Process Hollowing Detection</p>
+          <p class="desc">Compares the on-disk PE backing a process against its in-memory image to detect hollowing/replacement of legitimate binaries.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-hollowprocesses">vol -f mem.raw windows.malware.hollowprocesses</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-hollowprocesses">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.processghosting" data-phase-key="6-malware-code-injection">
+        <div class="step">59</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.processghosting">windows.malware.processghosting</a>
+          <p class="purpose">Process Ghosting Detection</p>
+          <p class="desc">Flags processes whose backing FILE_OBJECT is deleted, null, or delete-on-close — the ghosting/doppelgänging family of techniques.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-processghosting">vol -f mem.raw windows.malware.processghosting</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-processghosting">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.pebmasquerade" data-phase-key="6-malware-code-injection">
+        <div class="step">60</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.pebmasquerade">windows.malware.pebmasquerade</a>
+          <p class="purpose">Process Name Spoofing Detection</p>
+          <p class="desc">Compares the image path in EPROCESS against the PEB — catches malware that rewrites its own PEB to impersonate a system binary.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-pebmasquerade">vol -f mem.raw windows.malware.pebmasquerade</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-pebmasquerade">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.unhooked_system_calls" data-phase-key="6-malware-code-injection">
+        <div class="step">61</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.unhooked_system_calls">windows.malware.unhooked_system_calls</a>
+          <p class="purpose">EDR Unhooking Detection</p>
+          <p class="desc">Detects ntdll.dll stubs that differ from the clean on-disk version — the signature of userland EDR unhooking.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-unhooked-system-calls">vol -f mem.raw windows.malware.unhooked_system_calls</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-unhooked-system-calls">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.direct_system_calls" data-phase-key="6-malware-code-injection">
+        <div class="step">62</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.direct_system_calls">windows.malware.direct_system_calls</a>
+          <p class="purpose">Direct Syscall Detection</p>
+          <p class="desc">Finds syscall stubs executed outside ntdll (Hell&#x27;s Gate / SysWhispers style) used to bypass userland hooks.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-direct-system-calls">vol -f mem.raw windows.malware.direct_system_calls</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-direct-system-calls">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.indirect_system_calls" data-phase-key="6-malware-code-injection">
+        <div class="step">63</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.indirect_system_calls">windows.malware.indirect_system_calls</a>
+          <p class="purpose">Indirect Syscall Detection</p>
+          <p class="desc">Detects the indirect-syscall variant where the syscall instruction is borrowed from ntdll but reached from foreign code.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-indirect-system-calls">vol -f mem.raw windows.malware.indirect_system_calls</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-indirect-system-calls">Copy</button></div>
+      </div>
+      <div class="row" id="windows.etwpatch" data-phase-key="6-malware-code-injection">
+        <div class="step">64</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.etwpatch">windows.etwpatch</a>
+          <p class="purpose">ETW Tampering Detection</p>
+          <p class="desc">Identifies patched ETW functions (e.g. EtwEventWrite) used to blind telemetry before executing payloads.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-etwpatch">vol -f mem.raw windows.etwpatch</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-etwpatch">Copy</button></div>
+      </div>
+      <div class="row" id="windows.debugregisters" data-phase-key="6-malware-code-injection">
+        <div class="step">65</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.debugregisters">windows.debugregisters</a>
+          <p class="purpose">Hardware Breakpoint Detection</p>
+          <p class="desc">Inspects thread debug registers (DR0-DR7) — hardware breakpoints are used both by anti-analysis code and by hooking frameworks.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-debugregisters">vol -f mem.raw windows.debugregisters</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-debugregisters">Copy</button></div>
+      </div>
+      <div class="row" id="windows.pedump" data-phase-key="6-malware-code-injection">
+        <div class="step">66</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.pedump">windows.pedump</a>
+          <p class="purpose">PE Extraction From Memory</p>
+          <p class="desc">Rebuilds and dumps a PE file from a given base address in process or kernel space — how you recover the payload for static analysis.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-windows-pedump-pid-1234-base-0x400000">vol -f mem.raw -o ./out windows.pedump --pid 1234 --base 0x400000</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-windows-pedump-pid-1234-base-0x400000">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="7-kernel-drivers-rootkits">
+      <h2>7. Kernel, Drivers &amp; Rootkits <span class="phase-count">14 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.modules" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">67</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.modules">windows.modules</a>
+          <p class="purpose">Kernel Module Listing</p>
+          <p class="desc">Walks PsLoadedModuleList to list loaded kernel drivers with base addresses and paths.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-modules">vol -f mem.raw windows.modules</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-modules">Copy</button></div>
+      </div>
+      <div class="row" id="windows.modscan" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">68</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.modscan">windows.modscan</a>
+          <p class="purpose">Unlinked Kernel Module Scanning</p>
+          <p class="desc">Pool-scans for kernel modules independent of the list — modules present here but absent from windows.modules are hidden.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-modscan">vol -f mem.raw windows.modscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-modscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.unloadedmodules" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">69</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.unloadedmodules">windows.unloadedmodules</a>
+          <p class="purpose">Unloaded Driver History</p>
+          <p class="desc">Lists recently unloaded drivers with unload timestamps — evidence of a rootkit that loaded, acted, and removed itself.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-unloadedmodules">vol -f mem.raw windows.unloadedmodules</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-unloadedmodules">Copy</button></div>
+      </div>
+      <div class="row" id="windows.driverscan" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">70</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.driverscan">windows.driverscan</a>
+          <p class="purpose">Driver Object Scanning</p>
+          <p class="desc">Pool-scans for DRIVER_OBJECT structures, including drivers unlinked from the standard list.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-driverscan">vol -f mem.raw windows.driverscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-driverscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.drivermodule" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">71</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.drivermodule">windows.malware.drivermodule</a>
+          <p class="purpose">Hidden Driver Correlation</p>
+          <p class="desc">Correlates driver objects with kernel modules to prove a driver is hidden — a driver object with no matching module is a rootkit indicator.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-drivermodule">vol -f mem.raw windows.malware.drivermodule</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-drivermodule">Copy</button></div>
+      </div>
+      <div class="row" id="windows.driverirp" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">72</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.driverirp">windows.driverirp</a>
+          <p class="purpose">IRP Handler Hook Detection</p>
+          <p class="desc">Lists the IRP dispatch table of each driver; handlers pointing outside the owning driver&#x27;s range indicate IRP hooking.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-driverirp">vol -f mem.raw windows.driverirp</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-driverirp">Copy</button></div>
+      </div>
+      <div class="row" id="windows.devicetree" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">73</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.devicetree">windows.devicetree</a>
+          <p class="purpose">Device Stack Inspection</p>
+          <p class="desc">Renders drivers and their attached devices as a tree — reveals filter drivers inserted into the keyboard, disk, or network stack.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-devicetree">vol -f mem.raw windows.devicetree</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-devicetree">Copy</button></div>
+      </div>
+      <div class="row" id="windows.ssdt" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">74</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.ssdt">windows.ssdt</a>
+          <p class="purpose">Syscall Table Hook Detection</p>
+          <p class="desc">Dumps the System Service Descriptor Table and resolves each entry to its owning module; entries outside ntoskrnl/win32k are hooks.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-ssdt">vol -f mem.raw windows.ssdt</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-ssdt">Copy</button></div>
+      </div>
+      <div class="row" id="windows.callbacks" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">75</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.callbacks">windows.callbacks</a>
+          <p class="purpose">Kernel Callback Auditing</p>
+          <p class="desc">Lists kernel notification routines (process/thread/image load, registry callbacks) — both a rootkit persistence point and an EDR footprint.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-callbacks">vol -f mem.raw windows.callbacks</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-callbacks">Copy</button></div>
+      </div>
+      <div class="row" id="windows.timers" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">76</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.timers">windows.timers</a>
+          <p class="purpose">Kernel Timer &amp; DPC Auditing</p>
+          <p class="desc">Prints kernel timers and their associated DPC routines with owning module — a stealth execution path for kernel implants.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-timers">vol -f mem.raw windows.timers</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-timers">Copy</button></div>
+      </div>
+      <div class="row" id="windows.orphan_kernel_threads" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">77</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.orphan_kernel_threads">windows.orphan_kernel_threads</a>
+          <p class="purpose">Orphan Kernel Thread Detection</p>
+          <p class="desc">Finds kernel threads whose start address maps to no loaded module — code running from unbacked kernel memory.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-orphan-kernel-threads">vol -f mem.raw windows.orphan_kernel_threads</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-orphan-kernel-threads">Copy</button></div>
+      </div>
+      <div class="row" id="windows.bigpools" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">78</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.bigpools">windows.bigpools</a>
+          <p class="purpose">Large Pool Allocation Review</p>
+          <p class="desc">Lists big page pool allocations with tags — oversized or oddly-tagged allocations often hold kernel payloads.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-bigpools">vol -f mem.raw windows.bigpools</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-bigpools">Copy</button></div>
+      </div>
+      <div class="row" id="windows.poolscanner" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">79</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.poolscanner">windows.poolscanner</a>
+          <p class="purpose">Generic Pool Tag Scanning</p>
+          <p class="desc">Framework-level pool scanner used by the other *scan plugins; can be pointed at arbitrary tags for custom hunting.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-poolscanner">vol -f mem.raw windows.poolscanner</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-poolscanner">Copy</button></div>
+      </div>
+      <div class="row" id="windows.mutantscan" data-phase-key="7-kernel-drivers-rootkits">
+        <div class="step">80</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.mutantscan">windows.mutantscan</a>
+          <p class="purpose">Mutex/Mutant Enumeration</p>
+          <p class="desc">Scans for mutant (mutex) objects. Malware families use hardcoded mutex names as single-instance markers — excellent IOC pivot.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-mutantscan">vol -f mem.raw windows.mutantscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-mutantscan">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="8-credentials-secrets">
+      <h2>8. Credentials &amp; Secrets <span class="phase-count">4 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.registry.hashdump" data-phase-key="8-credentials-secrets">
+        <div class="step">81</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.hashdump">windows.registry.hashdump</a>
+          <p class="purpose">NTLM Hash Extraction</p>
+          <p class="desc">Extracts local account NTLM hashes from the SAM and SYSTEM hives in memory — evidence of, or material for, credential attacks.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-hashdump">vol -f mem.raw windows.registry.hashdump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-hashdump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.lsadump" data-phase-key="8-credentials-secrets">
+        <div class="step">82</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.lsadump">windows.registry.lsadump</a>
+          <p class="purpose">LSA Secret Extraction</p>
+          <p class="desc">Decrypts LSA secrets from the SECURITY hive: service account passwords, cached machine secrets, DPAPI keys.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-lsadump">vol -f mem.raw windows.registry.lsadump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-lsadump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.cachedump" data-phase-key="8-credentials-secrets">
+        <div class="step">83</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.cachedump">windows.registry.cachedump</a>
+          <p class="purpose">Domain Cached Credentials</p>
+          <p class="desc">Dumps cached domain credential hashes (MSCache/DCC2) for users who logged in without a reachable DC.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-cachedump">vol -f mem.raw windows.registry.cachedump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-cachedump">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.skeleton_key_check" data-phase-key="8-credentials-secrets">
+        <div class="step">84</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.skeleton_key_check">windows.malware.skeleton_key_check</a>
+          <p class="purpose">Domain Controller Backdoor Check</p>
+          <p class="desc">Checks lsass for the Skeleton Key patch, which lets an attacker authenticate as any domain user with a master password.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-skeleton-key-check">vol -f mem.raw windows.malware.skeleton_key_check</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-skeleton-key-check">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="9-services-tasks-persistence">
+      <h2>9. Services, Tasks &amp; Persistence <span class="phase-count">4 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.svcscan" data-phase-key="9-services-tasks-persistence">
+        <div class="step">85</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.svcscan">windows.svcscan</a>
+          <p class="purpose">Service Enumeration &amp; Anomaly Detection</p>
+          <p class="desc">Scans service records: name, display name, type, state, and binary path. Identifies malicious or suspicious service configurations, modified service paths, unverified distributors, and anomalous network-triggering services; paths in temp or user directories are prime persistence findings.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-svcscan">vol -f mem.raw windows.svcscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-svcscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.svclist" data-phase-key="9-services-tasks-persistence">
+        <div class="step">86</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.svclist">windows.svclist</a>
+          <p class="purpose">List-Based Service Enumeration</p>
+          <p class="desc">Enumerates services by walking the service record list rather than scanning — the clean baseline for comparison.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-svclist">vol -f mem.raw windows.svclist</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-svclist">Copy</button></div>
+      </div>
+      <div class="row" id="windows.malware.svcdiff" data-phase-key="9-services-tasks-persistence">
+        <div class="step">87</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.malware.svcdiff">windows.malware.svcdiff</a>
+          <p class="purpose">Hidden Service Detection</p>
+          <p class="desc">Diffs list-walked services against scanned services; anything only visible to the scanner is a service hidden by a rootkit.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-malware-svcdiff">vol -f mem.raw windows.malware.svcdiff</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-malware-svcdiff">Copy</button></div>
+      </div>
+      <div class="row" id="windows.registry.scheduled_tasks" data-phase-key="9-services-tasks-persistence">
+        <div class="step">88</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.registry.scheduled_tasks">windows.registry.scheduled_tasks</a>
+          <p class="purpose">Scheduled Task Persistence</p>
+          <p class="desc">Decodes scheduled tasks from the registry: actions, triggers, principals, and hidden-flag state. Top-tier persistence artifact.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-registry-scheduled-tasks">vol -f mem.raw windows.registry.scheduled_tasks</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-registry-scheduled-tasks">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="10-user-activity-gui-extraction">
+      <h2>10. User Activity, GUI &amp; Extraction <span class="phase-count">8 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="windows.cmdscan" data-phase-key="10-user-activity-gui-extraction">
+        <div class="step">89</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.cmdscan">windows.cmdscan</a>
+          <p class="purpose">Command History Recovery</p>
+          <p class="desc">Recovers the command history buffers of cmd.exe (COMMAND_HISTORY), including commands typed and then cleared.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-cmdscan">vol -f mem.raw windows.cmdscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-cmdscan">Copy</button></div>
+      </div>
+      <div class="row" id="windows.consoles" data-phase-key="10-user-activity-gui-extraction">
+        <div class="step">90</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.consoles">windows.consoles</a>
+          <p class="purpose">Console Screen Buffer Recovery</p>
+          <p class="desc">Recovers full console input and output buffers — you get the attacker&#x27;s commands together with the output they saw.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-consoles">vol -f mem.raw windows.consoles</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-consoles">Copy</button></div>
+      </div>
+      <div class="row" id="windows.windowstations" data-phase-key="10-user-activity-gui-extraction">
+        <div class="step">91</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.windowstations">windows.windowstations</a>
+          <p class="purpose">Window Station Enumeration</p>
+          <p class="desc">Scans for top-level window stations — the GUI containers used for session isolation and desktop hiding.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-windowstations">vol -f mem.raw windows.windowstations</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-windowstations">Copy</button></div>
+      </div>
+      <div class="row" id="windows.desktops" data-phase-key="10-user-activity-gui-extraction">
+        <div class="step">92</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.desktops">windows.desktops</a>
+          <p class="purpose">Desktop Object Enumeration</p>
+          <p class="desc">Lists desktop instances per window station; malware creates hidden desktops to run GUI apps invisibly.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-desktops">vol -f mem.raw windows.desktops</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-desktops">Copy</button></div>
+      </div>
+      <div class="row" id="windows.windows.Windows" data-phase-key="10-user-activity-gui-extraction">
+        <div class="step">93</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.windows.Windows">windows.windows.Windows</a>
+          <p class="purpose">Window Enumeration</p>
+          <p class="desc">Enumerates windows belonging to desktop instances, including titles — recovers what was on screen and by which process.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-windows-windows-windows">vol -f mem.raw windows.windows.Windows</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-windows-windows-windows">Copy</button></div>
+      </div>
+      <div class="row" id="windows.strings" data-phase-key="10-user-activity-gui-extraction">
+        <div class="step">94</div>
+        <div class="col-main">
+          <a class="plugin" href="#windows.strings">windows.strings</a>
+          <p class="purpose">String-to-Process Attribution</p>
+          <p class="desc">Takes output from the strings utility and maps each offset back to the owning process and virtual address — turns a raw string hit into a lead.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-strings-td-mem-raw-s-txt-vol-f-mem-raw-windows-strings-strings-file-s-txt">strings -td mem.raw &gt; s.txt; vol -f mem.raw windows.strings --strings-file s.txt</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-strings-td-mem-raw-s-txt-vol-f-mem-raw-windows-strings-strings-file-s-txt">Copy</button></div>
+      </div>
+      <div class="row" id="timeliner.Timeliner" data-phase-key="10-user-activity-gui-extraction">
+        <div class="step">95</div>
+        <div class="col-main">
+          <a class="plugin" href="#timeliner.Timeliner">timeliner.Timeliner</a>
+          <p class="purpose">Unified Forensic Timeline</p>
+          <p class="desc">Aggregates timestamps from every plugin that produces them into one chronological timeline. Best single command for &#x27;what happened, in order&#x27;.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-timeliner-timeliner">vol -f mem.raw timeliner.Timeliner</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-timeliner-timeliner">Copy</button></div>
+      </div>
+      <div class="row" id="layerwriter.LayerWriter" data-phase-key="10-user-activity-gui-extraction">
+        <div class="step">96</div>
+        <div class="col-main">
+          <a class="plugin" href="#layerwriter.LayerWriter">layerwriter.LayerWriter</a>
+          <p class="purpose">Raw Layer Export</p>
+          <p class="desc">Writes the primary memory layer out to a flat raw file — converts crash dumps, VMware, and hibernation images into raw for other tools.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-memory-dmp-o-out-layerwriter-layerwriter">vol -f memory.dmp -o ./out layerwriter.LayerWriter</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-memory-dmp-o-out-layerwriter-layerwriter">Copy</button></div>
+      </div>
+      </div>
+    </section>
+    <footer class="page-footer">
+      <p>Reference content verified against Volatility 3 stable v2.28 (2026-08-28), CC BY 4.0, Mousa Mohamed.
+      Not affiliated with or endorsed by the Volatility Foundation. Source: <a href="Volatility3_Memory_Analysis_Reference.xlsx">Volatility3_Memory_Analysis_Reference.xlsx</a> ·
+      <a href="https://github.com/theonlymosmos/Mousa-Analyzing-Memory">github.com/theonlymosmos/Mousa-Analyzing-Memory</a></p>
+    </footer>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

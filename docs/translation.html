@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Volatility 2 to 3 translation · Volatility 3 reference</title>
+<meta name="description" content="What each Volatility 2 command became in Volatility 3, and what has no replacement. 70 commands across 7 areas, for reading older writeups.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="index.html">vol3-reference</a>
+  <select id="page-select" aria-label="Go to page">
+        <option value="index.html">Overview</option>
+        <option value="windows.html">Windows</option>
+        <option value="linux.html">Linux</option>
+        <option value="workflow.html">Workflow</option>
+        <option value="framework.html">Framework</option>
+        <option value="triage.html">Triage</option>
+        <option value="translation.html" selected>Vol2 -&gt; Vol3</option>
+        <option value="notes.html">Notes &amp; legend</option>
+  </select>
+</header>
+
+<div class="shell">
+  <aside class="spine">
+    <a class="brand" href="index.html">vol3-reference</a>
+    <span class="subbrand">Volatility 3 · verified v2.28</span>
+    <nav class="pages" aria-label="Sections">
+      <a href="index.html">Overview</a>
+      <a href="windows.html">Windows</a>
+      <a href="linux.html">Linux</a>
+      <a href="workflow.html">Workflow</a>
+      <a href="framework.html">Framework</a>
+      <a href="triage.html">Triage</a>
+      <a href="translation.html" aria-current="page">Vol2 -&gt; Vol3</a>
+      <a href="notes.html">Notes &amp; legend</a>
+    </nav>
+    
+  </aside>
+
+  <main id="main">
+    <h1>Volatility 2 to 3 translation</h1>
+    <p class="dek">What each Volatility 2 command became in Volatility 3, and what has no replacement. 70 commands across 7 areas, for reading older writeups.</p>
+    <h2 id="image-identification">Image Identification</h2>
+    <table>
+      <thead><tr><th>Volatility 2</th><th>Volatility 3</th><th>Notes &amp; differences</th></tr></thead>
+      <tbody>
+      <tr><td><code>imageinfo</code></td><td><code>windows.info</code></td><td>Volatility 3 has no profiles. windows.info reads the build from symbols instead of guessing, so there is nothing to pass to a --profile flag.</td></tr>
+      <tr><td><code>kdbgscan</code></td><td><code>(no equivalent)</code></td><td>KDBG guessing existed to fix profile mismatches. Symbol-driven analysis removes the problem; if windows.info works, the kernel was resolved correctly.</td></tr>
+      <tr><td><code>kpcrscan</code></td><td><code>windows.kpcrs</code></td><td>Same data, no scanning needed — the KPCR is located through symbols.</td></tr>
+      <tr><td><code>crashinfo</code></td><td><code>windows.crashinfo</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>hibinfo</code></td><td><code>(no equivalent)</code></td><td>Hibernation files are handled automatically by the layer stackers; there is no separate info plugin.</td></tr>
+      <tr><td><code>imagecopy / raw2dmp</code></td><td><code>layerwriter.LayerWriter</code></td><td>Writes the resolved layer out as flat raw. Format conversion is now generic rather than per-format.</td></tr>
+      <tr><td><code>vboxinfo / vmwareinfo / hpakinfo</code></td><td><code>(no equivalent)</code></td><td>VirtualBox, VMware and HPAK containers are auto-detected and stacked; you no longer inspect or convert them manually.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="processes-dlls-threads">Processes, DLLs &amp; Threads</h2>
+    <table>
+      <thead><tr><th>Volatility 2</th><th>Volatility 3</th><th>Notes &amp; differences</th></tr></thead>
+      <tbody>
+      <tr><td><code>pslist</code></td><td><code>windows.pslist</code></td><td>Direct equivalent. Use --physical for physical offsets (was -P).</td></tr>
+      <tr><td><code>pstree</code></td><td><code>windows.pstree</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>psscan</code></td><td><code>windows.psscan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>psdispscan</code></td><td><code>(no equivalent)</code></td><td>DISPATCHER_HEADER scanning was XP-x86 only and unmaintained even in Volatility 2.</td></tr>
+      <tr><td><code>psxview</code></td><td><code>windows.malware.psxview</code></td><td>Moved into the .malware namespace along with the rest of the detection plugins.</td></tr>
+      <tr><td><code>dlllist</code></td><td><code>windows.dlllist</code></td><td>Direct equivalent. --pid replaces -p.</td></tr>
+      <tr><td><code>dlldump</code></td><td><code>windows.dlllist --dump</code></td><td>No separate dump plugin — dumping is now a flag on the listing plugin. Requires the global -o output directory.</td></tr>
+      <tr><td><code>ldrmodules</code></td><td><code>windows.malware.ldrmodules</code></td><td>Same PEB-vs-VAD cross-view, new namespace.</td></tr>
+      <tr><td><code>handles</code></td><td><code>windows.handles</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>getsids</code></td><td><code>windows.getsids</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>privs</code></td><td><code>windows.privileges</code></td><td>Renamed. Class is Privs, module is privileges.</td></tr>
+      <tr><td><code>envars</code></td><td><code>windows.envars</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>verinfo</code></td><td><code>windows.verinfo</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>enumfunc</code></td><td><code>windows.iat / windows.pe_symbols</code></td><td>Partial. IAT parsing and symbol resolution are split across two plugins; there is no single import/export enumerator.</td></tr>
+      <tr><td><code>threads</code></td><td><code>windows.threads</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>thrdscan</code></td><td><code>windows.thrdscan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>cmdscan</code></td><td><code>windows.cmdscan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>consoles</code></td><td><code>windows.consoles</code></td><td>Direct equivalent — still the plugin that returns attacker input and output together.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="process-memory">Process Memory</h2>
+    <table>
+      <thead><tr><th>Volatility 2</th><th>Volatility 3</th><th>Notes &amp; differences</th></tr></thead>
+      <tbody>
+      <tr><td><code>memmap</code></td><td><code>windows.memmap</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>memdump</code></td><td><code>windows.memmap --dump</code></td><td>Folded into memmap as a flag.</td></tr>
+      <tr><td><code>procdump</code></td><td><code>windows.pslist --dump</code></td><td>Folded into pslist. For a PE at an arbitrary address use windows.pedump --base instead.</td></tr>
+      <tr><td><code>vadinfo</code></td><td><code>windows.vadinfo</code></td><td>Direct equivalent. Still reports the ORIGINAL protection, not the current one.</td></tr>
+      <tr><td><code>vadwalk</code></td><td><code>windows.vadwalk</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>vadtree</code></td><td><code>windows.vadwalk</code></td><td>No dedicated tree view and no Graphviz/dot output in Volatility 3.</td></tr>
+      <tr><td><code>vaddump</code></td><td><code>windows.vadinfo --dump</code></td><td>Folded into vadinfo. --maxsize caps oversized regions.</td></tr>
+      <tr><td><code>malfind</code></td><td><code>windows.malware.malfind</code></td><td>New namespace, and --dump now extracts the injected regions directly.</td></tr>
+      <tr><td><code>evtlogs</code></td><td><code>(no equivalent)</code></td><td>Parsed XP/2003 binary .evt logs only. For modern .evtx, carve the files with filescan plus dumpfiles and parse them externally.</td></tr>
+      <tr><td><code>iehistory</code></td><td><code>(no equivalent)</code></td><td>No browser-history plugin in Volatility 3. Use regex or YARA scanning over process memory instead.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="kernel-drivers-objects">Kernel, Drivers &amp; Objects</h2>
+    <table>
+      <thead><tr><th>Volatility 2</th><th>Volatility 3</th><th>Notes &amp; differences</th></tr></thead>
+      <tbody>
+      <tr><td><code>modules</code></td><td><code>windows.modules</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>modscan</code></td><td><code>windows.modscan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>moddump</code></td><td><code>windows.modules --dump</code></td><td>Folded into modules; --base extracts a single driver.</td></tr>
+      <tr><td><code>ssdt</code></td><td><code>windows.ssdt</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>driverscan</code></td><td><code>windows.driverscan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>driverirp</code></td><td><code>windows.driverirp</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>filescan</code></td><td><code>windows.filescan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>dumpfiles</code></td><td><code>windows.dumpfiles</code></td><td>Equivalent, but the selector changed: --virtaddr / --physaddr replace -Q, and --filter replaces -r.</td></tr>
+      <tr><td><code>mutantscan</code></td><td><code>windows.mutantscan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>symlinkscan</code></td><td><code>windows.symlinkscan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>unloadedmodules</code></td><td><code>windows.unloadedmodules</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>apihooks</code></td><td><code>(no equivalent)</code></td><td>No general IAT/inline hook scanner. The nearest coverage is windows.malware.unhooked_system_calls plus the direct/indirect syscall plugins.</td></tr>
+      <tr><td><code>impscan</code></td><td><code>(no equivalent)</code></td><td>No import rebuilding. Dump with pedump and rebuild the IAT in an external tool.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="networking">Networking</h2>
+    <table>
+      <thead><tr><th>Volatility 2</th><th>Volatility 3</th><th>Notes &amp; differences</th></tr></thead>
+      <tbody>
+      <tr><td><code>connections / connscan / sockets / sockscan</code></td><td><code>windows.netscan</code></td><td>The four XP-era plugins collapsed into one scanner covering TCP and UDP, IPv4 and IPv6, on all supported builds.</td></tr>
+      <tr><td><code>netscan</code></td><td><code>windows.netscan</code></td><td>Direct equivalent. windows.netstat is the list-walking counterpart.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="registry">Registry</h2>
+    <table>
+      <thead><tr><th>Volatility 2</th><th>Volatility 3</th><th>Notes &amp; differences</th></tr></thead>
+      <tbody>
+      <tr><td><code>hivelist</code></td><td><code>windows.registry.hivelist</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>hivescan</code></td><td><code>windows.registry.hivescan</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>printkey</code></td><td><code>windows.registry.printkey</code></td><td>Direct equivalent. --key takes the path, --offset scopes it to one hive.</td></tr>
+      <tr><td><code>hivedump</code></td><td><code>windows.registry.printkey --recurse</code></td><td>No separate plugin — recursion is a flag.</td></tr>
+      <tr><td><code>hashdump</code></td><td><code>windows.registry.hashdump</code></td><td>Moved under the registry namespace. Needs pycryptodome installed.</td></tr>
+      <tr><td><code>lsadump</code></td><td><code>windows.registry.lsadump</code></td><td>Moved under the registry namespace.</td></tr>
+      <tr><td><code>cachedump</code></td><td><code>windows.registry.cachedump</code></td><td>Moved under the registry namespace.</td></tr>
+      <tr><td><code>userassist</code></td><td><code>windows.registry.userassist</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>shimcache</code></td><td><code>windows.shimcachemem</code></td><td>Renamed; reads the ahcache.sys AVL tree rather than the registry hive.</td></tr>
+      <tr><td><code>getservicesids</code></td><td><code>windows.getservicesids</code></td><td>Direct equivalent.</td></tr>
+      <tr><td><code>dumpregistry</code></td><td><code>(no equivalent)</code></td><td>To recover a hive file, locate it with windows.filescan and extract it with windows.dumpfiles.</td></tr>
+      <tr><td><code>shellbags</code></td><td><code>(no equivalent)</code></td><td>Notable gap. Shellbag parsing has no Volatility 3 plugin — dump NTUSER.DAT / USRCLASS.DAT and parse offline.</td></tr>
+      <tr><td><code>svcscan</code></td><td><code>windows.svcscan</code></td><td>Direct equivalent, plus windows.svclist and windows.malware.svcdiff for cross-view.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="file-system-misc">File System &amp; Misc</h2>
+    <table>
+      <thead><tr><th>Volatility 2</th><th>Volatility 3</th><th>Notes &amp; differences</th></tr></thead>
+      <tbody>
+      <tr><td><code>mbrparser</code></td><td><code>windows.mbrscan</code></td><td>Renamed.</td></tr>
+      <tr><td><code>mftparser</code></td><td><code>windows.mftscan.MFTScan</code></td><td>Renamed. windows.mftscan.ADS and .ResidentData cover the other two views.</td></tr>
+      <tr><td><code>strings</code></td><td><code>windows.strings</code></td><td>Direct equivalent. Still needs a strings-tool output file passed via --strings-file.</td></tr>
+      <tr><td><code>timeliner</code></td><td><code>timeliner.Timeliner</code></td><td>Now OS-independent and lives at the top level, not under windows.</td></tr>
+      <tr><td><code>volshell</code></td><td><code>volshell.py (separate entry point)</code></td><td>Shipped as its own script alongside vol.py, not as a plugin. See the Usage Notes sheet.</td></tr>
+      <tr><td><code>bioskbd / patcher / pagecheck</code></td><td><code>(no equivalent)</code></td><td>Niche Volatility 2 plugins with no Volatility 3 port.</td></tr>
+      <tr><td><code>linux_* / mac_*</code></td><td><code>linux.* / mac.*</code></td><td>The underscore naming was replaced by dotted namespaces, and Linux profiles were replaced by ISF symbol files built with dwarf2json.</td></tr>
+      </tbody>
+    </table>
+    <footer class="page-footer">
+      <p>Reference content verified against Volatility 3 stable v2.28 (2026-08-28), CC BY 4.0, Mousa Mohamed.
+      Not affiliated with or endorsed by the Volatility Foundation. Source: <a href="Volatility3_Memory_Analysis_Reference.xlsx">Volatility3_Memory_Analysis_Reference.xlsx</a> ·
+      <a href="https://github.com/theonlymosmos/Mousa-Analyzing-Memory">github.com/theonlymosmos/Mousa-Analyzing-Memory</a></p>
+    </footer>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

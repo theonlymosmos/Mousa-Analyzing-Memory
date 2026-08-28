@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Volatility 3 memory analysis reference · Volatility 3 reference</title>
+<meta name="description" content="A Volatility 3 plugin reference for memory forensics, verified against a real install.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="index.html">vol3-reference</a>
+  <select id="page-select" aria-label="Go to page">
+        <option value="index.html" selected>Overview</option>
+        <option value="windows.html">Windows</option>
+        <option value="linux.html">Linux</option>
+        <option value="workflow.html">Workflow</option>
+        <option value="framework.html">Framework</option>
+        <option value="triage.html">Triage</option>
+        <option value="translation.html">Vol2 -&gt; Vol3</option>
+        <option value="notes.html">Notes &amp; legend</option>
+  </select>
+</header>
+
+<div class="shell">
+  <aside class="spine">
+    <a class="brand" href="index.html">vol3-reference</a>
+    <span class="subbrand">Volatility 3 · verified v2.28</span>
+    <nav class="pages" aria-label="Sections">
+      <a href="index.html" aria-current="page">Overview</a>
+      <a href="windows.html">Windows</a>
+      <a href="linux.html">Linux</a>
+      <a href="workflow.html">Workflow</a>
+      <a href="framework.html">Framework</a>
+      <a href="triage.html">Triage</a>
+      <a href="translation.html">Vol2 -&gt; Vol3</a>
+      <a href="notes.html">Notes &amp; legend</a>
+    </nav>
+    
+  </aside>
+
+  <main id="main">
+    <h1>Volatility 3 memory analysis reference</h1>
+    <p class="dek">A Volatility 3 plugin reference for memory forensics, verified against a real install.</p>
+    <p>This is a Volatility 3 plugin reference built from a working memory-forensics
+    workflow: 96 Windows plugins and 59 Linux plugins, mapped to the analysis phase
+    each one belongs to, with the flags and an example command for each.</p>
+
+    <div class="verify-box">
+      <p><strong>Verified against Volatility 3 stable v2.28</strong> (2026-08-28).
+      Every plugin name and flag in this reference was checked by running <code>vol.py &lt;plugin&gt; -h</code>
+      against that release. Plugin sets change between versions -- check your own <code>vol -h</code> output
+      if something here does not match what you have installed.</p>
+    </div>
+
+    <h2>Get Volatility 3 running</h2>
+    <div class="cmd-wrap"><code class="command" id="cmd-install">pip install volatility3</code>
+    <button class="copy-btn" type="button" data-copy-target="cmd-install">Copy</button></div>
+    <div class="cmd-wrap"><code class="command" id="cmd-run">vol -f memory.raw windows.info</code>
+    <button class="copy-btn" type="button" data-copy-target="cmd-run">Copy</button></div>
+    <p>See <a href="notes.html">usage notes &amp; legend</a> for symbol tables, output formats,
+    and the rest of the flags that apply across every plugin.</p>
+
+    <h2>Where to go</h2>
+    <ul class="index-links">
+      <li><a href="windows.html"><span class="link-title">Windows plugins</span><span class="link-desc">96 plugins across 10 phases</span></a></li>
+      <li><a href="linux.html"><span class="link-title">Linux plugins</span><span class="link-desc">59 plugins across 9 phases</span></a></li>
+      <li><a href="workflow.html"><span class="link-title">Workflow summary</span><span class="link-desc">Windows and Linux analysis sequence, phase by phase</span></a></li>
+      <li><a href="framework.html"><span class="link-title">Framework plugins</span><span class="link-desc">10 OS-independent plugins</span></a></li>
+      <li><a href="triage.html"><span class="link-title">Triage &amp; gotchas</span><span class="link-desc">24 indicators, false positives, and pitfalls</span></a></li>
+      <li><a href="translation.html"><span class="link-title">Vol2 -&gt; Vol3 translation</span><span class="link-desc">70 command mappings across 7 areas</span></a></li>
+      <li><a href="notes.html"><span class="link-title">Usage notes &amp; legend</span><span class="link-desc">Syntax, flags, and the phase colour legend</span></a></li>
+    </ul>
+
+    <h2>Source</h2>
+    <p>Every row on this site comes from <a href="Volatility3_Memory_Analysis_Reference.xlsx">Volatility3_Memory_Analysis_Reference.xlsx</a>, kept in the
+    repository root. The spreadsheet is the source of truth -- download it directly if you want the
+    raw data.</p>
+    <footer class="page-footer">
+      <p>Reference content verified against Volatility 3 stable v2.28 (2026-08-28), CC BY 4.0, Mousa Mohamed.
+      Not affiliated with or endorsed by the Volatility Foundation. Source: <a href="Volatility3_Memory_Analysis_Reference.xlsx">Volatility3_Memory_Analysis_Reference.xlsx</a> ·
+      <a href="https://github.com/theonlymosmos/Mousa-Analyzing-Memory">github.com/theonlymosmos/Mousa-Analyzing-Memory</a></p>
+    </footer>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

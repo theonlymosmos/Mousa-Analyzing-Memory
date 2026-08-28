@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analysis workflow · Volatility 3 reference</title>
+<meta name="description" content="The recommended execution sequence for Windows and Linux memory images, phase by phase.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="index.html">vol3-reference</a>
+  <select id="page-select" aria-label="Go to page">
+        <option value="index.html">Overview</option>
+        <option value="windows.html">Windows</option>
+        <option value="linux.html">Linux</option>
+        <option value="workflow.html" selected>Workflow</option>
+        <option value="framework.html">Framework</option>
+        <option value="triage.html">Triage</option>
+        <option value="translation.html">Vol2 -&gt; Vol3</option>
+        <option value="notes.html">Notes &amp; legend</option>
+  </select>
+</header>
+
+<div class="shell">
+  <aside class="spine">
+    <a class="brand" href="index.html">vol3-reference</a>
+    <span class="subbrand">Volatility 3 · verified v2.28</span>
+    <nav class="pages" aria-label="Sections">
+      <a href="index.html">Overview</a>
+      <a href="windows.html">Windows</a>
+      <a href="linux.html">Linux</a>
+      <a href="workflow.html" aria-current="page">Workflow</a>
+      <a href="framework.html">Framework</a>
+      <a href="triage.html">Triage</a>
+      <a href="translation.html">Vol2 -&gt; Vol3</a>
+      <a href="notes.html">Notes &amp; legend</a>
+    </nav>
+    
+  </aside>
+
+  <main id="main">
+    <h1>Analysis workflow</h1>
+    <p class="dek">The recommended execution sequence for Windows and Linux memory images, phase by phase.</p>
+    <h2 id="windows-workflow">Windows workflow</h2>
+    <table>
+      <caption>10 phases</caption>
+      <thead><tr><th>Phase</th><th>Stage</th><th>Associated plugins</th><th>Key objectives</th></tr></thead>
+      <tbody>
+      <tr><td>Phase 1</td><td>1. Image Identification &amp; Triage</td><td><code>windows.info</code>, <code>banners.Banners</code>, <code>isfinfo.IsfInfo</code>, <code>windows.crashinfo</code>, <code>windows.kpcrs</code>, <code>windows.virtmap</code></td><td>Confirm the image is parseable, identify OS build and architecture, and verify the correct symbol table loaded before anything else is trusted.</td></tr><tr><td>Phase 2</td><td>2. Processes &amp; Threads</td><td><code>windows.pslist</code>, <code>windows.psscan</code>, <code>windows.pstree</code>, <code>windows.malware.psxview</code>, <code>windows.cmdline</code>, <code>windows.envars</code>, <code>windows.sessions</code>, <code>windows.getsids</code>, <code>windows.privileges</code>, <code>windows.getservicesids</code>, <code>windows.joblinks</code>, <code>windows.handles</code>, <code>windows.threads</code>, <code>windows.thrdscan</code>, <code>windows.suspended_threads</code>, <code>windows.malware.suspicious_threads</code>, <code>windows.dlllist</code>, <code>windows.malware.ldrmodules</code>, <code>windows.iat</code>, <code>windows.verinfo</code>, <code>windows.pe_symbols</code>, <code>windows.vadinfo</code>, <code>windows.vadwalk</code></td><td>Establish the process baseline, then attack it from multiple angles: hidden/unlinked processes, spoofed lineage, injected threads, unlinked DLLs, and RWX memory regions.</td></tr><tr><td>Phase 3</td><td>3. Network Connections</td><td><code>windows.netscan</code>, <code>windows.netstat</code></td><td>Recover active, closed, and listening endpoints; map outbound C2 (Command &amp; Control) IP addresses and listening backdoors back to a specific PID and process image.</td></tr><tr><td>Phase 4</td><td>4. Registry Analysis</td><td><code>windows.registry.hivelist</code>, <code>windows.registry.hivescan</code>, <code>windows.registry.printkey</code>, <code>windows.registry.printkey --recurse</code>, <code>windows.registry.userassist</code>, <code>windows.registry.amcache</code>, <code>windows.shimcachemem</code>, <code>windows.registry.getcellroutine</code></td><td>Read persistence keys (Run, Services, Winlogon, IFEO), recover execution evidence from AmCache/Shimcache/UserAssist, and detect registry-level rootkit hooks.</td></tr><tr><td>Phase 5</td><td>5. File &amp; Disk Artifacts</td><td><code>windows.filescan</code>, <code>windows.dumpfiles</code>, <code>windows.mftscan.MFTScan</code>, <code>windows.mftscan.ADS</code>, <code>windows.mftscan.ResidentData</code>, <code>windows.mbrscan</code>, <code>windows.symlinkscan</code>, <code>windows.memmap</code>, <code>windows.pslist --dump</code>, <code>windows.dlllist --dump</code>, <code>windows.vadinfo --dump</code>, <code>windows.modules --dump</code>, <code>windows.malware.malfind --dump</code>, <code>windows.truecrypt</code></td><td>Locate and extract files still resident in memory, recover MFT records and ADS for timeline building, and dump process address spaces for offline analysis.</td></tr><tr><td>Phase 6</td><td>6. Malware &amp; Code Injection</td><td><code>windows.malware.malfind</code>, <code>yarascan.YaraScan</code>, <code>windows.vadyarascan</code>, <code>windows.vadregexscan</code>, <code>windows.malware.hollowprocesses</code>, <code>windows.malware.processghosting</code>, <code>windows.malware.pebmasquerade</code>, <code>windows.malware.unhooked_system_calls</code>, <code>windows.malware.direct_system_calls</code>, <code>windows.malware.indirect_system_calls</code>, <code>windows.etwpatch</code>, <code>windows.debugregisters</code>, <code>windows.pedump</code></td><td>Hunt injected and unbacked code, hollowed and ghosted processes, spoofed PEBs, EDR evasion via syscalls and ETW patching, and signature matches via YARA.</td></tr><tr><td>Phase 7</td><td>7. Kernel, Drivers &amp; Rootkits</td><td><code>windows.modules</code>, <code>windows.modscan</code>, <code>windows.unloadedmodules</code>, <code>windows.driverscan</code>, <code>windows.malware.drivermodule</code>, <code>windows.driverirp</code>, <code>windows.devicetree</code>, <code>windows.ssdt</code>, <code>windows.callbacks</code>, <code>windows.timers</code>, <code>windows.orphan_kernel_threads</code>, <code>windows.bigpools</code>, <code>windows.poolscanner</code>, <code>windows.mutantscan</code></td><td>Detect kernel-mode compromise: hidden drivers and modules, SSDT/IRP hooks, malicious callbacks and timers, and code executing from unbacked kernel memory.</td></tr><tr><td>Phase 8</td><td>8. Credentials &amp; Secrets</td><td><code>windows.registry.hashdump</code>, <code>windows.registry.lsadump</code>, <code>windows.registry.cachedump</code>, <code>windows.malware.skeleton_key_check</code></td><td>Extract NTLM hashes, LSA secrets, and cached domain credentials, and check for domain-level backdoors such as Skeleton Key.</td></tr><tr><td>Phase 9</td><td>9. Services, Tasks &amp; Persistence</td><td><code>windows.svcscan</code>, <code>windows.svclist</code>, <code>windows.malware.svcdiff</code>, <code>windows.registry.scheduled_tasks</code></td><td>Audit services and scheduled tasks for abnormal binary paths, hidden entries visible only to scanning, and attacker-created autostart mechanisms.</td></tr><tr><td>Phase 10</td><td>10. User Activity, GUI &amp; Extraction</td><td><code>windows.cmdscan</code>, <code>windows.consoles</code>, <code>windows.windowstations</code>, <code>windows.desktops</code>, <code>windows.windows.Windows</code>, <code>windows.strings</code>, <code>timeliner.Timeliner</code>, <code>layerwriter.LayerWriter</code></td><td>Recover typed commands and console output, reconstruct on-screen activity, attribute raw strings to processes, and build a unified timeline of the incident.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="linux-workflow">Linux workflow</h2>
+    <table>
+      <caption>9 phases</caption>
+      <thead><tr><th>Phase</th><th>Stage</th><th>Associated plugins</th><th>Key objectives</th></tr></thead>
+      <tbody>
+      <tr><td>Phase 1</td><td>1. Image Identification &amp; Symbols</td><td><code>banners.Banners</code>, <code>isfinfo.IsfInfo</code>, <code>linux.boottime</code>, <code>linux.vmcoreinfo</code>, <code>linux.kallsyms</code>, <code>linux.iomem</code></td><td>Identify the exact kernel build from the banner and confirm a matching ISF symbol file is loading — on Linux, no symbols means no analysis at all.</td></tr><tr><td>Phase 2</td><td>2. Processes &amp; Threads</td><td><code>linux.pslist</code>, <code>linux.psscan</code>, <code>linux.pidhashtable</code>, <code>linux.pstree</code>, <code>linux.psaux</code>, <code>linux.envars</code>, <code>linux.capabilities</code>, <code>linux.malware.process_spoofing</code>, <code>linux.kthreads</code>, <code>linux.ptrace</code>, <code>linux.pscallstack</code>, <code>linux.proc.Maps</code>, <code>linux.elfs</code>, <code>linux.library_list</code></td><td>Build the task baseline from three independent enumeration paths, then check argv, environment, capabilities, name spoofing, and mapped ELFs for anomalies.</td></tr><tr><td>Phase 3</td><td>3. Network Connections</td><td><code>linux.sockstat</code>, <code>linux.sockscan</code>, <code>linux.ip.Addr</code>, <code>linux.ip.Link</code>, <code>linux.malware.netfilter</code></td><td>Enumerate sockets per task and by scanning, review interface state for sniffing, and inspect netfilter hooks used to hide or redirect traffic.</td></tr><tr><td>Phase 4</td><td>4. Rootkit &amp; Hooking Detection</td><td><code>linux.malware.check_syscall</code>, <code>linux.malware.check_idt</code>, <code>linux.malware.check_afinfo</code>, <code>linux.malware.check_modules</code>, <code>linux.malware.check_creds</code>, <code>linux.malware.tty_check</code>, <code>linux.malware.keyboard_notifiers</code>, <code>linux.tracing.ftrace</code>, <code>linux.tracing.tracepoints</code>, <code>linux.tracing.perf_events</code>, <code>linux.ebpf</code></td><td>Test every classic and modern kernel hook point: syscall table, IDT, protocol handlers, credentials, TTY, notifiers, ftrace, tracepoints, perf, and eBPF.</td></tr><tr><td>Phase 5</td><td>5. Files &amp; Filesystem</td><td><code>linux.lsof</code>, <code>linux.mountinfo</code>, <code>linux.pagecache.Files</code>, <code>linux.pagecache.InodePages</code>, <code>linux.pagecache.RecoverFs</code></td><td>Recover open descriptors, mount and namespace layout for container context, and pull cached file content — up to the entire cached filesystem — out of RAM.</td></tr><tr><td>Phase 6</td><td>6. Malware, Modules &amp; Injected Code</td><td><code>linux.malware.malfind</code>, <code>yarascan.YaraScan</code>, <code>linux.vmayarascan</code>, <code>linux.vmaregexscan</code>, <code>linux.lsmod</code>, <code>linux.malware.hidden_modules</code>, <code>linux.malware.modxview</code>, <code>linux.module_extract</code></td><td>Find injected RWX regions, match YARA signatures inside process memory, and resolve module-level rootkits by cross-viewing lsmod against carved structures.</td></tr><tr><td>Phase 7</td><td>7. User Activity &amp; Credentials</td><td><code>linux.bash</code>, <code>linux.kmsg</code>, <code>linux.graphics.fbdev</code></td><td>Recover attacker-typed commands from in-memory bash history, read the kernel log for module loads and crashes, and recover console framebuffer content.</td></tr><tr><td>Phase 8</td><td>8. Evidence Extraction &amp; Dumping</td><td><code>linux.proc.Maps</code>, <code>linux.elfs</code>, <code>linux.module_extract</code>, <code>layerwriter.LayerWriter</code></td><td>Extract the artifacts you found: specific VMAs, mapped and deleted ELF binaries, hidden kernel modules, and a flat raw copy of the memory layer.</td></tr><tr><td>Phase 9</td><td>9. Timelining &amp; Framework Utilities</td><td><code>timeliner.Timeliner</code>, <code>regexscan.RegExScan</code>, <code>configwriter.ConfigWriter</code></td><td>Assemble a chronological account of the incident and preserve a reproducible configuration of how the image was parsed.</td></tr>
+      </tbody>
+    </table>
+    <footer class="page-footer">
+      <p>Reference content verified against Volatility 3 stable v2.28 (2026-08-28), CC BY 4.0, Mousa Mohamed.
+      Not affiliated with or endorsed by the Volatility Foundation. Source: <a href="Volatility3_Memory_Analysis_Reference.xlsx">Volatility3_Memory_Analysis_Reference.xlsx</a> ·
+      <a href="https://github.com/theonlymosmos/Mousa-Analyzing-Memory">github.com/theonlymosmos/Mousa-Analyzing-Memory</a></p>
+    </footer>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
