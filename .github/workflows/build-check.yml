@@ -1,0 +1,38 @@
+name: Build check
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  verify-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Extract workbook to JSON
+        run: python3 tools/extract.py
+
+      - name: Build static site
+        run: python3 tools/build.py
+
+      - name: Run definition-of-done checks
+        run: python3 tools/validate.py
+
+      - name: Fail if docs/ or data/ are stale
+        run: |
+          if ! git diff --quiet -- data/ docs/; then
+            echo "docs/ or data/reference.json is out of date with the workbook."
+            echo "Run 'python3 tools/extract.py && python3 tools/build.py' locally and commit the result."
+            git diff --stat -- data/ docs/
+            exit 1
+          fi

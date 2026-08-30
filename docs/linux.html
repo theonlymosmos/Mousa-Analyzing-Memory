@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux plugins · Volatility 3 reference</title>
+<meta name="description" content="All 59 Linux plugins from the workbook, grouped by the 9-phase analysis workflow, with a runnable example command for each.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="index.html">vol3-reference</a>
+  <select id="page-select" aria-label="Go to page">
+        <option value="index.html">Overview</option>
+        <option value="windows.html">Windows</option>
+        <option value="linux.html" selected>Linux</option>
+        <option value="workflow.html">Workflow</option>
+        <option value="framework.html">Framework</option>
+        <option value="triage.html">Triage</option>
+        <option value="translation.html">Vol2 -&gt; Vol3</option>
+        <option value="notes.html">Notes &amp; legend</option>
+  </select>
+</header>
+
+<div class="shell">
+  <aside class="spine">
+    <a class="brand" href="index.html">vol3-reference</a>
+    <span class="subbrand">Volatility 3 · verified v2.28</span>
+    <nav class="pages" aria-label="Sections">
+      <a href="index.html">Overview</a>
+      <a href="windows.html">Windows</a>
+      <a href="linux.html" aria-current="page">Linux</a>
+      <a href="workflow.html">Workflow</a>
+      <a href="framework.html">Framework</a>
+      <a href="triage.html">Triage</a>
+      <a href="translation.html">Vol2 -&gt; Vol3</a>
+      <a href="notes.html">Notes &amp; legend</a>
+    </nav>
+    <ul class="phase-list">
+        <li><a href="#1-image-identification-symbols">1. Image Identification &amp; Symbols</a></li><li><a href="#2-processes-threads">2. Processes &amp; Threads</a></li><li><a href="#3-network-connections">3. Network Connections</a></li><li><a href="#4-rootkit-hooking-detection">4. Rootkit &amp; Hooking Detection</a></li><li><a href="#5-files-filesystem">5. Files &amp; Filesystem</a></li><li><a href="#6-malware-modules-injected-code">6. Malware, Modules &amp; Injected Code</a></li><li><a href="#7-user-activity-credentials">7. User Activity &amp; Credentials</a></li><li><a href="#8-evidence-extraction-dumping">8. Evidence Extraction &amp; Dumping</a></li><li><a href="#9-timelining-framework-utilities">9. Timelining &amp; Framework Utilities</a></li>
+      </ul>
+  </aside>
+
+  <main id="main">
+    <h1>Linux plugins</h1>
+    <p class="dek">All 59 Linux plugins from the workbook, grouped by the 9-phase analysis workflow, with a runnable example command for each.</p>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <input id="filter-input" type="text" placeholder="Filter Linux plugins ( / to focus, Esc to clear )" autocomplete="off">
+        <span id="filter-count"></span>
+      </div>
+      <div class="phase-toggles" role="group" aria-label="Filter by phase">
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="1-image-identification-symbols">1. Image Identification &amp; Symbols</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="2-processes-threads">2. Processes &amp; Threads</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="3-network-connections">3. Network Connections</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="4-rootkit-hooking-detection">4. Rootkit &amp; Hooking Detection</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="5-files-filesystem">5. Files &amp; Filesystem</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="6-malware-modules-injected-code">6. Malware, Modules &amp; Injected Code</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="7-user-activity-credentials">7. User Activity &amp; Credentials</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="8-evidence-extraction-dumping">8. Evidence Extraction &amp; Dumping</button>
+      <button class="phase-toggle" type="button" aria-pressed="false" data-phase="9-timelining-framework-utilities">9. Timelining &amp; Framework Utilities</button>
+      </div>
+    </div>
+    <section class="phase-section" id="1-image-identification-symbols">
+      <h2>1. Image Identification &amp; Symbols <span class="phase-count">6 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="banners.Banners" data-phase-key="1-image-identification-symbols">
+        <div class="step">01</div>
+        <div class="col-main">
+          <a class="plugin" href="#banners.Banners">banners.Banners</a>
+          <p class="purpose">Kernel Version Identification</p>
+          <p class="desc">Extracts kernel banner strings from the image (distro, kernel version, build date, compiler). Mandatory first step: the banner tells you exactly which ISF symbol file you must build or download.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-banners-banners">vol -f mem.lime banners.Banners</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-banners-banners">Copy</button></div>
+      </div>
+      <div class="row" id="isfinfo.IsfInfo" data-phase-key="1-image-identification-symbols">
+        <div class="step">02</div>
+        <div class="col-main">
+          <a class="plugin" href="#isfinfo.IsfInfo">isfinfo.IsfInfo</a>
+          <p class="purpose">Symbol Table Inventory</p>
+          <p class="desc">Lists the ISF files Volatility can see and which banners they match. Use it to confirm your generated symbol file is actually being picked up.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-isfinfo-isfinfo">vol isfinfo.IsfInfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-isfinfo-isfinfo">Copy</button></div>
+      </div>
+      <div class="row" id="linux.boottime" data-phase-key="1-image-identification-symbols">
+        <div class="step">03</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.boottime">linux.boottime</a>
+          <p class="purpose">System Boot Time</p>
+          <p class="desc">Reports when the system was started — anchors every other timestamp and lets you compute uptime at capture.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-boottime">vol -f mem.lime linux.boottime</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-boottime">Copy</button></div>
+      </div>
+      <div class="row" id="linux.vmcoreinfo" data-phase-key="1-image-identification-symbols">
+        <div class="step">04</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.vmcoreinfo">linux.vmcoreinfo</a>
+          <p class="purpose">VMCoreInfo Table Parsing</p>
+          <p class="desc">Enumerates VMCOREINFO tables embedded in the image: kernel offsets, KASLR base, and structure sizes. Useful when symbols only partially resolve.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-vmcoreinfo">vol -f mem.lime linux.vmcoreinfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-vmcoreinfo">Copy</button></div>
+      </div>
+      <div class="row" id="linux.kallsyms" data-phase-key="1-image-identification-symbols">
+        <div class="step">05</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.kallsyms">linux.kallsyms</a>
+          <p class="purpose">Kernel Symbol Enumeration</p>
+          <p class="desc">Enumerates kernel symbols from the in-memory kallsyms table, including symbols from loaded modules. Ground truth for validating addresses seen elsewhere.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-kallsyms">vol -f mem.lime linux.kallsyms</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-kallsyms">Copy</button></div>
+      </div>
+      <div class="row" id="linux.iomem" data-phase-key="1-image-identification-symbols">
+        <div class="step">06</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.iomem">linux.iomem</a>
+          <p class="purpose">Physical Memory Map</p>
+          <p class="desc">Reproduces /proc/iomem — the physical address map of system RAM and device regions.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-iomem">vol -f mem.lime linux.iomem</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-iomem">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="2-processes-threads">
+      <h2>2. Processes &amp; Threads <span class="phase-count">14 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="linux.pslist" data-phase-key="2-processes-threads">
+        <div class="step">07</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.pslist">linux.pslist</a>
+          <p class="purpose">Active Process Listing</p>
+          <p class="desc">Walks the task_struct linked list to enumerate running tasks (PID, TID, PPID, COMM, UID/GID, offset). Baseline process view.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-pslist">vol -f mem.lime linux.pslist</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-pslist">Copy</button></div>
+      </div>
+      <div class="row" id="linux.psscan" data-phase-key="2-processes-threads">
+        <div class="step">08</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.psscan">linux.psscan</a>
+          <p class="purpose">Hidden/Terminated Process Hunting</p>
+          <p class="desc">Scans memory for task_struct signatures independently of the linked list — reveals processes unlinked by a rootkit.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-psscan">vol -f mem.lime linux.psscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-psscan">Copy</button></div>
+      </div>
+      <div class="row" id="linux.pidhashtable" data-phase-key="2-processes-threads">
+        <div class="step">09</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.pidhashtable">linux.pidhashtable</a>
+          <p class="purpose">PID Hash Table Enumeration</p>
+          <p class="desc">Enumerates tasks through the kernel PID hash table — a third, independent view. Cross-compare with pslist and psscan for hidden tasks.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-pidhashtable">vol -f mem.lime linux.pidhashtable</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-pidhashtable">Copy</button></div>
+      </div>
+      <div class="row" id="linux.pstree" data-phase-key="2-processes-threads">
+        <div class="step">10</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.pstree">linux.pstree</a>
+          <p class="purpose">Process Lineage &amp; Anomaly Detection</p>
+          <p class="desc">Renders the parent/child hierarchy. Catches shells spawned by web servers, cron-spawned implants, and reparented daemons.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-pstree">vol -f mem.lime linux.pstree</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-pstree">Copy</button></div>
+      </div>
+      <div class="row" id="linux.psaux" data-phase-key="2-processes-threads">
+        <div class="step">11</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.psaux">linux.psaux</a>
+          <p class="purpose">Execution Argument Auditing</p>
+          <p class="desc">Reconstructs full argv per task, like ps aux — exposes reverse-shell one-liners, curl-pipe-bash, and encoded payload arguments.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-psaux">vol -f mem.lime linux.psaux</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-psaux">Copy</button></div>
+      </div>
+      <div class="row" id="linux.envars" data-phase-key="2-processes-threads">
+        <div class="step">12</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.envars">linux.envars</a>
+          <p class="purpose">Process Environment Auditing</p>
+          <p class="desc">Dumps environment variables per process. LD_PRELOAD, HTTP_PROXY, and credentials passed via env show up here.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-envars-pid-1234">vol -f mem.lime linux.envars --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-envars-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="linux.capabilities" data-phase-key="2-processes-threads">
+        <div class="step">13</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.capabilities">linux.capabilities</a>
+          <p class="purpose">Process Capability Auditing</p>
+          <p class="desc">Lists the capability sets of each task (permitted, effective, inheritable, bounding). CAP_SYS_ADMIN or CAP_SYS_MODULE on an odd process is a privilege-escalation lead.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-capabilities">vol -f mem.lime linux.capabilities</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-capabilities">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.process_spoofing" data-phase-key="2-processes-threads">
+        <div class="step">14</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.process_spoofing">linux.malware.process_spoofing</a>
+          <p class="purpose">Process Name Spoofing Detection</p>
+          <p class="desc">Compares each task&#x27;s executable path against its cmdline and comm fields — catches implants masquerading as kernel threads or system daemons.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-process-spoofing">vol -f mem.lime linux.malware.process_spoofing</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-process-spoofing">Copy</button></div>
+      </div>
+      <div class="row" id="linux.kthreads" data-phase-key="2-processes-threads">
+        <div class="step">15</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.kthreads">linux.kthreads</a>
+          <p class="purpose">Kernel Thread Auditing</p>
+          <p class="desc">Enumerates kernel threads and their entry functions — a kthread whose function is not in a legitimate module is a kernel implant.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-kthreads">vol -f mem.lime linux.kthreads</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-kthreads">Copy</button></div>
+      </div>
+      <div class="row" id="linux.ptrace" data-phase-key="2-processes-threads">
+        <div class="step">16</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.ptrace">linux.ptrace</a>
+          <p class="purpose">Debugger Attachment Detection</p>
+          <p class="desc">Lists ptrace tracer/tracee relationships — reveals injection via ptrace and anti-debug self-tracing.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-ptrace">vol -f mem.lime linux.ptrace</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-ptrace">Copy</button></div>
+      </div>
+      <div class="row" id="linux.pscallstack" data-phase-key="2-processes-threads">
+        <div class="step">17</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.pscallstack">linux.pscallstack</a>
+          <p class="purpose">Task Call Stack Reconstruction</p>
+          <p class="desc">Reconstructs the kernel call stack of each task; frames resolving to unknown addresses indicate execution from hidden modules.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-pscallstack">vol -f mem.lime linux.pscallstack</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-pscallstack">Copy</button></div>
+      </div>
+      <div class="row" id="linux.proc.Maps" data-phase-key="2-processes-threads">
+        <div class="step">18</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.proc.Maps">linux.proc.Maps</a>
+          <p class="purpose">Process Memory Map Listing</p>
+          <p class="desc">Lists VMAs per process, like /proc/pid/maps: address range, permissions, and backing file. The Linux equivalent of vadinfo.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-proc-maps-pid-1234">vol -f mem.lime linux.proc.Maps --pid 1234</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-proc-maps-pid-1234">Copy</button></div>
+      </div>
+      <div class="row" id="linux.elfs" data-phase-key="2-processes-threads">
+        <div class="step">19</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.elfs">linux.elfs</a>
+          <p class="purpose">Mapped ELF Enumeration</p>
+          <p class="desc">Lists every memory-mapped ELF per process; --dump rebuilds them to disk for static analysis.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-linux-elfs-pid-1234-dump">vol -f mem.lime -o ./out linux.elfs --pid 1234 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-linux-elfs-pid-1234-dump">Copy</button></div>
+      </div>
+      <div class="row" id="linux.library_list" data-phase-key="2-processes-threads">
+        <div class="step">20</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.library_list">linux.library_list</a>
+          <p class="purpose">Shared Library Auditing</p>
+          <p class="desc">Lists shared objects loaded into each process — detects LD_PRELOAD hijacks and trojanised .so files.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-library-list">vol -f mem.lime linux.library_list</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-library-list">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="3-network-connections">
+      <h2>3. Network Connections <span class="phase-count">5 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="linux.sockstat" data-phase-key="3-network-connections">
+        <div class="step">21</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.sockstat">linux.sockstat</a>
+          <p class="purpose">Socket &amp; Connection Listing</p>
+          <p class="desc">Enumerates sockets per task (TCP/UDP/UNIX/netlink) with local/remote addresses, state, and owning PID. Primary C2 and backdoor discovery plugin.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-sockstat">vol -f mem.lime linux.sockstat</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-sockstat">Copy</button></div>
+      </div>
+      <div class="row" id="linux.sockscan" data-phase-key="3-network-connections">
+        <div class="step">22</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.sockscan">linux.sockscan</a>
+          <p class="purpose">Orphan Socket Scanning</p>
+          <p class="desc">Scans the memory layer for socket structures independent of the task list — finds sockets belonging to hidden or exited processes.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-sockscan">vol -f mem.lime linux.sockscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-sockscan">Copy</button></div>
+      </div>
+      <div class="row" id="linux.ip.Addr" data-phase-key="3-network-connections">
+        <div class="step">23</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.ip.Addr">linux.ip.Addr</a>
+          <p class="purpose">Interface Address Listing</p>
+          <p class="desc">Lists network interfaces and their addresses, like ip addr show — including promiscuous-mode flags that suggest sniffing.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-ip-addr">vol -f mem.lime linux.ip.Addr</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-ip-addr">Copy</button></div>
+      </div>
+      <div class="row" id="linux.ip.Link" data-phase-key="3-network-connections">
+        <div class="step">24</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.ip.Link">linux.ip.Link</a>
+          <p class="purpose">Interface Link-Layer Listing</p>
+          <p class="desc">Lists link-layer interface details, like ip link show — reveals unexpected tunnels, taps, and bridges.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-ip-link">vol -f mem.lime linux.ip.Link</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-ip-link">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.netfilter" data-phase-key="3-network-connections">
+        <div class="step">25</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.netfilter">linux.malware.netfilter</a>
+          <p class="purpose">Netfilter Hook Inspection</p>
+          <p class="desc">Lists registered netfilter (iptables/nftables) hook functions; hooks owned by unknown modules are used for traffic hiding, redirection, or port-knocking triggers.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-netfilter">vol -f mem.lime linux.malware.netfilter</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-netfilter">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="4-rootkit-hooking-detection">
+      <h2>4. Rootkit &amp; Hooking Detection <span class="phase-count">11 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="linux.malware.check_syscall" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">26</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.check_syscall">linux.malware.check_syscall</a>
+          <p class="purpose">Syscall Table Hook Detection</p>
+          <p class="desc">Compares each syscall table entry against its expected symbol; anything pointing outside the kernel text is a hooked syscall.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-check-syscall">vol -f mem.lime linux.malware.check_syscall</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-check-syscall">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.check_idt" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">27</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.check_idt">linux.malware.check_idt</a>
+          <p class="purpose">Interrupt Table Tampering</p>
+          <p class="desc">Verifies the Interrupt Descriptor Table against known-good handlers — detects low-level interrupt hooking.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-check-idt">vol -f mem.lime linux.malware.check_idt</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-check-idt">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.check_afinfo" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">28</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.check_afinfo">linux.malware.check_afinfo</a>
+          <p class="purpose">Protocol Handler Hooking</p>
+          <p class="desc">Verifies af_inet/af_inet6 operation structures; hooked TCP/UDP handlers are used to hide connections from netstat-like tools.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-check-afinfo">vol -f mem.lime linux.malware.check_afinfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-check-afinfo">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.check_modules" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">29</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.check_modules">linux.malware.check_modules</a>
+          <p class="purpose">Module List Inconsistency Check</p>
+          <p class="desc">Compares the kernel module list against sysfs — a module in one and not the other has been unlinked to hide itself.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-check-modules">vol -f mem.lime linux.malware.check_modules</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-check-modules">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.check_creds" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">30</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.check_creds">linux.malware.check_creds</a>
+          <p class="purpose">Credential Structure Sharing</p>
+          <p class="desc">Detects processes sharing a cred structure — the fingerprint of a rootkit granting root to a chosen process.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-check-creds">vol -f mem.lime linux.malware.check_creds</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-check-creds">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.tty_check" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">31</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.tty_check">linux.malware.tty_check</a>
+          <p class="purpose">TTY Hook / Keylogger Detection</p>
+          <p class="desc">Checks tty receive_buf function pointers for hooks — the standard kernel keylogger technique.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-tty-check">vol -f mem.lime linux.malware.tty_check</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-tty-check">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.keyboard_notifiers" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">32</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.keyboard_notifiers">linux.malware.keyboard_notifiers</a>
+          <p class="purpose">Keyboard Notifier Chain Audit</p>
+          <p class="desc">Parses the keyboard notifier call chain; unexpected callbacks are keyloggers registered as notifiers.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-keyboard-notifiers">vol -f mem.lime linux.malware.keyboard_notifiers</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-keyboard-notifiers">Copy</button></div>
+      </div>
+      <div class="row" id="linux.tracing.ftrace" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">33</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.tracing.ftrace">linux.tracing.ftrace</a>
+          <p class="purpose">Ftrace Hook Detection</p>
+          <p class="desc">Detects function hooking implemented via the ftrace framework — the modern, stealthy successor to syscall table patching.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-tracing-ftrace">vol -f mem.lime linux.tracing.ftrace</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-tracing-ftrace">Copy</button></div>
+      </div>
+      <div class="row" id="linux.tracing.tracepoints" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">34</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.tracing.tracepoints">linux.tracing.tracepoints</a>
+          <p class="purpose">Tracepoint Hook Detection</p>
+          <p class="desc">Detects handlers attached to kernel tracepoints, another legitimate subsystem abused for stealth hooking.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-tracing-tracepoints">vol -f mem.lime linux.tracing.tracepoints</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-tracing-tracepoints">Copy</button></div>
+      </div>
+      <div class="row" id="linux.tracing.perf_events" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">35</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.tracing.perf_events">linux.tracing.perf_events</a>
+          <p class="purpose">Perf Event Abuse Detection</p>
+          <p class="desc">Lists perf events per process; attacker-registered events can capture data or execute callbacks without a module.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-tracing-perf-events">vol -f mem.lime linux.tracing.perf_events</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-tracing-perf-events">Copy</button></div>
+      </div>
+      <div class="row" id="linux.ebpf" data-phase-key="4-rootkit-hooking-detection">
+        <div class="step">36</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.ebpf">linux.ebpf</a>
+          <p class="purpose">eBPF Program Enumeration</p>
+          <p class="desc">Enumerates loaded eBPF programs and maps — increasingly the payload of choice for modern Linux rootkits and stealth C2.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-ebpf">vol -f mem.lime linux.ebpf</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-ebpf">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="5-files-filesystem">
+      <h2>5. Files &amp; Filesystem <span class="phase-count">5 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="linux.lsof" data-phase-key="5-files-filesystem">
+        <div class="step">37</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.lsof">linux.lsof</a>
+          <p class="purpose">Open File Descriptor Listing</p>
+          <p class="desc">Lists open file descriptors per process (files, sockets, pipes, deleted files) with inode metadata — finds staged payloads and open exfil handles.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-lsof">vol -f mem.lime linux.lsof</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-lsof">Copy</button></div>
+      </div>
+      <div class="row" id="linux.mountinfo" data-phase-key="5-files-filesystem">
+        <div class="step">38</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.mountinfo">linux.mountinfo</a>
+          <p class="purpose">Mounted Filesystem &amp; Namespace Enumeration</p>
+          <p class="desc">Lists mount points per mount namespace — exposes container boundaries, bind mounts of host paths, and escape indicators.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-mountinfo">vol -f mem.lime linux.mountinfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-mountinfo">Copy</button></div>
+      </div>
+      <div class="row" id="linux.pagecache.Files" data-phase-key="5-files-filesystem">
+        <div class="step">39</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.pagecache.Files">linux.pagecache.Files</a>
+          <p class="purpose">Page Cache File Listing</p>
+          <p class="desc">Lists files present in the kernel page cache, with paths and inode details — the Linux equivalent of filescan.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-pagecache-files">vol -f mem.lime linux.pagecache.Files</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-pagecache-files">Copy</button></div>
+      </div>
+      <div class="row" id="linux.pagecache.InodePages" data-phase-key="5-files-filesystem">
+        <div class="step">40</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.pagecache.InodePages">linux.pagecache.InodePages</a>
+          <p class="purpose">Cached File Content Recovery</p>
+          <p class="desc">Lists and dumps the cached pages of a specific inode — recovers file content, including deleted files still cached in RAM.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-linux-pagecache-inodepages-inode-0xffff9c0012345678-dump">vol -f mem.lime -o ./out linux.pagecache.InodePages --inode 0xffff9c0012345678 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-linux-pagecache-inodepages-inode-0xffff9c0012345678-dump">Copy</button></div>
+      </div>
+      <div class="row" id="linux.pagecache.RecoverFs" data-phase-key="5-files-filesystem">
+        <div class="step">41</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.pagecache.RecoverFs">linux.pagecache.RecoverFs</a>
+          <p class="purpose">Bulk Filesystem Recovery</p>
+          <p class="desc">Recovers the entire cached filesystem tree (files, directories, symlinks) into a compressed tarball. Heavy, but often yields the whole attacker toolkit.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-linux-pagecache-recoverfs">vol -f mem.lime -o ./out linux.pagecache.RecoverFs</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-linux-pagecache-recoverfs">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="6-malware-modules-injected-code">
+      <h2>6. Malware, Modules &amp; Injected Code <span class="phase-count">8 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="linux.malware.malfind" data-phase-key="6-malware-modules-injected-code">
+        <div class="step">42</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.malfind">linux.malware.malfind</a>
+          <p class="purpose">Code Injection Detection</p>
+          <p class="desc">Finds VMAs with write+execute permissions and no backing file — injected shellcode and unpacked payloads in process memory.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-malfind">vol -f mem.lime linux.malware.malfind</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-malfind">Copy</button></div>
+      </div>
+      <div class="row" id="yarascan.YaraScan" data-phase-key="6-malware-modules-injected-code">
+        <div class="step">43</div>
+        <div class="col-main">
+          <a class="plugin" href="#yarascan.YaraScan">yarascan.YaraScan</a>
+          <p class="purpose">Full-Image Signature Hunting</p>
+          <p class="desc">Runs YARA rules across the whole image, kernel space included. Broadest sweep for known malware strings and flag patterns.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-yarascan-yarascan-yara-string-flag">vol -f mem.lime yarascan.YaraScan --yara-string &quot;flag{&quot;</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-yarascan-yarascan-yara-string-flag">Copy</button></div>
+      </div>
+      <div class="row" id="linux.vmayarascan" data-phase-key="6-malware-modules-injected-code">
+        <div class="step">44</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.vmayarascan">linux.vmayarascan</a>
+          <p class="purpose">Process-Scoped YARA Hunting</p>
+          <p class="desc">Runs YARA against process VMAs so each hit maps to a PID and region — the actionable version of a raw-image hit.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-vmayarascan-yara-file-rules-yar">vol -f mem.lime linux.vmayarascan --yara-file rules.yar</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-vmayarascan-yara-file-rules-yar">Copy</button></div>
+      </div>
+      <div class="row" id="linux.vmaregexscan" data-phase-key="6-malware-modules-injected-code">
+        <div class="step">45</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.vmaregexscan">linux.vmaregexscan</a>
+          <p class="purpose">Process-Scoped Regex Hunting</p>
+          <p class="desc">Regex search across process VMAs — URLs, IPs, key material, and CTF flag formats.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-vmaregexscan-pattern-https-w">vol -f mem.lime linux.vmaregexscan --pattern &quot;https?://[\\w./-]+&quot;</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-vmaregexscan-pattern-https-w">Copy</button></div>
+      </div>
+      <div class="row" id="linux.lsmod" data-phase-key="6-malware-modules-injected-code">
+        <div class="step">46</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.lsmod">linux.lsmod</a>
+          <p class="purpose">Loaded Kernel Module Listing</p>
+          <p class="desc">Lists modules from the standard module list, with taint flags — the clean baseline for hidden-module comparison.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-lsmod">vol -f mem.lime linux.lsmod</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-lsmod">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.hidden_modules" data-phase-key="6-malware-modules-injected-code">
+        <div class="step">47</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.hidden_modules">linux.malware.hidden_modules</a>
+          <p class="purpose">Hidden Module Carving</p>
+          <p class="desc">Carves module structures out of memory and reports those absent from the standard list — LKM rootkits that unlinked themselves.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-hidden-modules">vol -f mem.lime linux.malware.hidden_modules</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-hidden-modules">Copy</button></div>
+      </div>
+      <div class="row" id="linux.malware.modxview" data-phase-key="6-malware-modules-injected-code">
+        <div class="step">48</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.malware.modxview">linux.malware.modxview</a>
+          <p class="purpose">Consolidated Module Cross-View</p>
+          <p class="desc">Merges lsmod, check_modules, and hidden_modules into one table with taint state — the fastest single command for module-level rootkit triage.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-malware-modxview">vol -f mem.lime linux.malware.modxview</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-malware-modxview">Copy</button></div>
+      </div>
+      <div class="row" id="linux.module_extract" data-phase-key="6-malware-modules-injected-code">
+        <div class="step">49</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.module_extract">linux.module_extract</a>
+          <p class="purpose">Kernel Module Extraction</p>
+          <p class="desc">Rebuilds an ELF module from a kernel address to disk — how you recover a hidden LKM for reverse engineering.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-linux-module-extract-base-0xffffffffc0123000">vol -f mem.lime -o ./out linux.module_extract --base 0xffffffffc0123000</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-linux-module-extract-base-0xffffffffc0123000">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="7-user-activity-credentials">
+      <h2>7. User Activity &amp; Credentials <span class="phase-count">3 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="linux.bash" data-phase-key="7-user-activity-credentials">
+        <div class="step">50</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.bash">linux.bash</a>
+          <p class="purpose">Bash History Recovery</p>
+          <p class="desc">Extracts in-memory bash history buffers with timestamps — direct evidence of the commands an attacker typed, including history never written to disk.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-bash">vol -f mem.lime linux.bash</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-bash">Copy</button></div>
+      </div>
+      <div class="row" id="linux.kmsg" data-phase-key="7-user-activity-credentials">
+        <div class="step">51</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.kmsg">linux.kmsg</a>
+          <p class="purpose">Kernel Log Buffer Reading</p>
+          <p class="desc">Reads the kernel ring buffer (dmesg) — module loads, OOM kills, segfaults, and USB/device events around the incident.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-linux-kmsg">vol -f mem.lime linux.kmsg</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-linux-kmsg">Copy</button></div>
+      </div>
+      <div class="row" id="linux.graphics.fbdev" data-phase-key="7-user-activity-credentials">
+        <div class="step">52</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.graphics.fbdev">linux.graphics.fbdev</a>
+          <p class="purpose">Framebuffer Extraction</p>
+          <p class="desc">Extracts framebuffer content from the fbdev subsystem — recovers what was rendered on the console screen.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-linux-graphics-fbdev">vol -f mem.lime -o ./out linux.graphics.fbdev</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-linux-graphics-fbdev">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="8-evidence-extraction-dumping">
+      <h2>8. Evidence Extraction &amp; Dumping <span class="phase-count">4 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="linux.proc.Maps-2" data-phase-key="8-evidence-extraction-dumping">
+        <div class="step">53</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.proc.Maps-2">linux.proc.Maps</a>
+          <p class="purpose">Region-Level Memory Dumping</p>
+          <p class="desc">With --dump, writes selected VMAs to disk — the extraction step after malfind or a YARA hit identifies a region.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-linux-proc-maps-pid-1234-dump">vol -f mem.lime -o ./out linux.proc.Maps --pid 1234 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-linux-proc-maps-pid-1234-dump">Copy</button></div>
+      </div>
+      <div class="row" id="linux.elfs-2" data-phase-key="8-evidence-extraction-dumping">
+        <div class="step">54</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.elfs-2">linux.elfs</a>
+          <p class="purpose">Process Binary Recovery</p>
+          <p class="desc">With --dump, rebuilds mapped ELF images to disk, including deleted binaries still resident in memory.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-linux-elfs-pid-1234-dump-2">vol -f mem.lime -o ./out linux.elfs --pid 1234 --dump</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-linux-elfs-pid-1234-dump-2">Copy</button></div>
+      </div>
+      <div class="row" id="linux.module_extract-2" data-phase-key="8-evidence-extraction-dumping">
+        <div class="step">55</div>
+        <div class="col-main">
+          <a class="plugin" href="#linux.module_extract-2">linux.module_extract</a>
+          <p class="purpose">Hidden Module Extraction</p>
+          <p class="desc">Rebuilds a kernel module ELF from its base address — the extraction step after modxview or hidden_modules names an address.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-linux-module-extract-base-0xffffffffc0123000-2">vol -f mem.lime -o ./out linux.module_extract --base 0xffffffffc0123000</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-linux-module-extract-base-0xffffffffc0123000-2">Copy</button></div>
+      </div>
+      <div class="row" id="layerwriter.LayerWriter" data-phase-key="8-evidence-extraction-dumping">
+        <div class="step">56</div>
+        <div class="col-main">
+          <a class="plugin" href="#layerwriter.LayerWriter">layerwriter.LayerWriter</a>
+          <p class="purpose">Raw Layer Export</p>
+          <p class="desc">Writes the primary memory layer to a flat raw file — converts LiME, AVML, and crash formats for use with other tooling.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-layerwriter-layerwriter">vol -f mem.lime -o ./out layerwriter.LayerWriter</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-layerwriter-layerwriter">Copy</button></div>
+      </div>
+      </div>
+    </section><section class="phase-section" id="9-timelining-framework-utilities">
+      <h2>9. Timelining &amp; Framework Utilities <span class="phase-count">3 plugins</span></h2>
+      <div class="rows">
+      <div class="row" id="timeliner.Timeliner" data-phase-key="9-timelining-framework-utilities">
+        <div class="step">57</div>
+        <div class="col-main">
+          <a class="plugin" href="#timeliner.Timeliner">timeliner.Timeliner</a>
+          <p class="purpose">Unified Forensic Timeline</p>
+          <p class="desc">Aggregates timestamps from every timestamp-producing Linux plugin into one chronological view — process starts, bash history, file metadata.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-timeliner-timeliner">vol -f mem.lime timeliner.Timeliner</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-timeliner-timeliner">Copy</button></div>
+      </div>
+      <div class="row" id="regexscan.RegExScan" data-phase-key="9-timelining-framework-utilities">
+        <div class="step">58</div>
+        <div class="col-main">
+          <a class="plugin" href="#regexscan.RegExScan">regexscan.RegExScan</a>
+          <p class="purpose">Whole-Image Regex Search</p>
+          <p class="desc">Regex search across the entire image regardless of process context — the catch-all when a scoped scan finds nothing.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-regexscan-regexscan-pattern-flag">vol -f mem.lime regexscan.RegExScan --pattern &quot;flag\\{.*\\}&quot;</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-regexscan-regexscan-pattern-flag">Copy</button></div>
+      </div>
+      <div class="row" id="configwriter.ConfigWriter" data-phase-key="9-timelining-framework-utilities">
+        <div class="step">59</div>
+        <div class="col-main">
+          <a class="plugin" href="#configwriter.ConfigWriter">configwriter.ConfigWriter</a>
+          <p class="purpose">Analysis Configuration Export</p>
+          <p class="desc">Writes the resolved configuration (layers, symbols, offsets) to JSON — makes a long analysis reproducible and shareable.</p>
+        </div>
+        <div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-lime-o-out-configwriter-configwriter">vol -f mem.lime -o ./out configwriter.ConfigWriter</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-lime-o-out-configwriter-configwriter">Copy</button></div>
+      </div>
+      </div>
+    </section>
+    <footer class="page-footer">
+      <p>Reference content verified against Volatility 3 stable v2.28 (2026-08-28), CC BY 4.0, Mousa Mohamed.
+      Not affiliated with or endorsed by the Volatility Foundation. Source: <a href="Volatility3_Memory_Analysis_Reference.xlsx">Volatility3_Memory_Analysis_Reference.xlsx</a> ·
+      <a href="https://github.com/theonlymosmos/Mousa-Analyzing-Memory">github.com/theonlymosmos/Mousa-Analyzing-Memory</a></p>
+    </footer>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

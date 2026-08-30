@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Framework &amp; cross-OS plugins · Volatility 3 reference</title>
+<meta name="description" content="10 plugins that work against any image type, regardless of OS.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="index.html">vol3-reference</a>
+  <select id="page-select" aria-label="Go to page">
+        <option value="index.html">Overview</option>
+        <option value="windows.html">Windows</option>
+        <option value="linux.html">Linux</option>
+        <option value="workflow.html">Workflow</option>
+        <option value="framework.html" selected>Framework</option>
+        <option value="triage.html">Triage</option>
+        <option value="translation.html">Vol2 -&gt; Vol3</option>
+        <option value="notes.html">Notes &amp; legend</option>
+  </select>
+</header>
+
+<div class="shell">
+  <aside class="spine">
+    <a class="brand" href="index.html">vol3-reference</a>
+    <span class="subbrand">Volatility 3 · verified v2.28</span>
+    <nav class="pages" aria-label="Sections">
+      <a href="index.html">Overview</a>
+      <a href="windows.html">Windows</a>
+      <a href="linux.html">Linux</a>
+      <a href="workflow.html">Workflow</a>
+      <a href="framework.html" aria-current="page">Framework</a>
+      <a href="triage.html">Triage</a>
+      <a href="translation.html">Vol2 -&gt; Vol3</a>
+      <a href="notes.html">Notes &amp; legend</a>
+    </nav>
+    
+  </aside>
+
+  <main id="main">
+    <h1>Framework &amp; cross-OS plugins</h1>
+    <p class="dek">10 plugins that work against any image type, regardless of OS.</p>
+    <table>
+      <thead><tr><th>Plugin</th><th>Applies to</th><th>Description</th><th>Command</th></tr></thead>
+      <tbody>
+      <tr id="banners.Banners">
+        <td><a class="plugin" href="#banners.Banners">banners.Banners</a></td>
+        <td>All</td>
+        <td>Scans the image for kernel banner strings. Identifies Linux kernels and confirms Windows images when info plugins fail.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-banners-banners">vol -f mem.raw banners.Banners</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-banners-banners">Copy</button></div></td>
+      </tr><tr id="isfinfo.IsfInfo">
+        <td><a class="plugin" href="#isfinfo.IsfInfo">isfinfo.IsfInfo</a></td>
+        <td>All</td>
+        <td>Reports available ISF symbol files and which images they match. First stop for symbol resolution failures.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-isfinfo-isfinfo">vol isfinfo.IsfInfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-isfinfo-isfinfo">Copy</button></div></td>
+      </tr><tr id="yarascan.YaraScan">
+        <td><a class="plugin" href="#yarascan.YaraScan">yarascan.YaraScan</a></td>
+        <td>All</td>
+        <td>YARA scanning across the full memory image, independent of OS and process context.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-yarascan-yarascan-yara-file-rules-yar">vol -f mem.raw yarascan.YaraScan --yara-file rules.yar</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-yarascan-yarascan-yara-file-rules-yar">Copy</button></div></td>
+      </tr><tr id="regexscan.RegExScan">
+        <td><a class="plugin" href="#regexscan.RegExScan">regexscan.RegExScan</a></td>
+        <td>All</td>
+        <td>Regex scanning across the full image — useful for flags, URLs, emails, and key material.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-regexscan-regexscan-pattern-flag">vol -f mem.raw regexscan.RegExScan --pattern &quot;flag\{.*\}&quot;</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-regexscan-regexscan-pattern-flag">Copy</button></div></td>
+      </tr><tr id="timeliner.Timeliner">
+        <td><a class="plugin" href="#timeliner.Timeliner">timeliner.Timeliner</a></td>
+        <td>All</td>
+        <td>Aggregates timestamps from all timestamp-producing plugins into one sortable timeline.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-r-csv-timeliner-timeliner-timeline-csv">vol -f mem.raw -r csv timeliner.Timeliner &gt; timeline.csv</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-r-csv-timeliner-timeliner-timeline-csv">Copy</button></div></td>
+      </tr><tr id="layerwriter.LayerWriter">
+        <td><a class="plugin" href="#layerwriter.LayerWriter">layerwriter.LayerWriter</a></td>
+        <td>All</td>
+        <td>Writes the primary memory layer to a flat raw file — format conversion for third-party tools.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-memory-dmp-o-out-layerwriter-layerwriter">vol -f memory.dmp -o ./out layerwriter.LayerWriter</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-memory-dmp-o-out-layerwriter-layerwriter">Copy</button></div></td>
+      </tr><tr id="configwriter.ConfigWriter">
+        <td><a class="plugin" href="#configwriter.ConfigWriter">configwriter.ConfigWriter</a></td>
+        <td>All</td>
+        <td>Exports the resolved analysis configuration (layers, symbols, offsets) as JSON for reproducibility.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-mem-raw-o-out-configwriter-configwriter">vol -f mem.raw -o ./out configwriter.ConfigWriter</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-mem-raw-o-out-configwriter-configwriter">Copy</button></div></td>
+      </tr><tr id="frameworkinfo.FrameworkInfo">
+        <td><a class="plugin" href="#frameworkinfo.FrameworkInfo">frameworkinfo.FrameworkInfo</a></td>
+        <td>All</td>
+        <td>Lists the framework&#x27;s own components: layers, symbol tables, automagic modules, and available plugins.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-frameworkinfo-frameworkinfo">vol frameworkinfo.FrameworkInfo</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-frameworkinfo-frameworkinfo">Copy</button></div></td>
+      </tr><tr id="volshell.py">
+        <td><a class="plugin" href="#volshell.py">volshell.py</a></td>
+        <td>All</td>
+        <td>Not a plugin — a second entry point shipped beside vol.py. Drops you into a Python shell with the image loaded so you can walk structures directly (ps(), dt(&#x27;_EPROCESS&#x27;), db(addr)). This is how you answer questions no plugin covers.</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-python3-volshell-py-f-mem-raw-w">python3 volshell.py -f mem.raw -w</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-python3-volshell-py-f-mem-raw-w">Copy</button></div></td>
+      </tr><tr id="vmscan.Vmscan">
+        <td><a class="plugin" href="#vmscan.Vmscan">vmscan.Vmscan</a></td>
+        <td>All</td>
+        <td>Scans for virtual machine host/guest structures inside a hypervisor memory image (nested memory analysis).</td>
+        <td><div class="cmd-wrap"><code class="command" id="cmd-cmd-vol-f-host-raw-vmscan-vmscan">vol -f host.raw vmscan.Vmscan</code><button class="copy-btn" type="button" data-copy-target="cmd-cmd-vol-f-host-raw-vmscan-vmscan">Copy</button></div></td>
+      </tr>
+      </tbody>
+    </table>
+    <footer class="page-footer">
+      <p>Reference content verified against Volatility 3 stable v2.28 (2026-08-28), CC BY 4.0, Mousa Mohamed.
+      Not affiliated with or endorsed by the Volatility Foundation. Source: <a href="Volatility3_Memory_Analysis_Reference.xlsx">Volatility3_Memory_Analysis_Reference.xlsx</a> ·
+      <a href="https://github.com/theonlymosmos/Mousa-Analyzing-Memory">github.com/theonlymosmos/Mousa-Analyzing-Memory</a></p>
+    </footer>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
