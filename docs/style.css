@@ -155,7 +155,8 @@ code, .mono, .plugin, .command, .step, .phase-label, kbd {
 }
 .phase-list li { position: relative; }
 .phase-list a {
-  display: block;
+  display: flex;
+  align-items: center;
   text-decoration: none;
   color: var(--muted);
   font-size: var(--fs-xs);
@@ -167,8 +168,19 @@ code, .mono, .plugin, .command, .step, .phase-label, kbd {
 .phase-list a:hover { color: var(--ink); }
 .phase-list li.current a {
   color: var(--ink);
-  border-left-color: var(--accent);
+  border-left-color: var(--phase-strong, var(--accent));
   font-weight: 700;
+}
+
+.dot {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  margin-right: 0.5em;
+  flex-shrink: 0;
+  background: var(--phase-strong, var(--muted));
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
 }
 
 /* ---------- main column ---------- */
@@ -191,6 +203,19 @@ h2 {
   border-top: 1px solid var(--line);
 }
 h2:first-of-type { border-top: none; padding-top: 0; }
+
+.phase-section {
+  margin-bottom: 0.5rem;
+}
+.phase-section h2 {
+  margin: 2.5rem 0 0;
+  padding: 0.6rem 0.9rem;
+  border-top: none;
+  border-left: 5px solid var(--phase-strong, var(--line));
+  background: color-mix(in srgb, var(--phase, var(--surface)) 55%, var(--paper));
+  border-radius: 0 3px 3px 0;
+}
+.phase-section:first-of-type h2 { margin-top: 0; }
 h3 {
   font-family: var(--font-mono);
   font-size: var(--fs-md);
@@ -251,19 +276,22 @@ p { max-width: 68ch; }
   margin-top: 0.6rem;
 }
 .phase-toggle {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--phase-strong, var(--line)) 45%, var(--line));
   background: #fff;
-  color: var(--muted);
-  padding: 0.25rem 0.5rem;
+  color: var(--ink);
+  padding: 0.25rem 0.55rem;
   cursor: pointer;
-  border-radius: 0;
+  border-radius: 3px;
 }
 .phase-toggle[aria-pressed="true"] {
-  border-color: var(--accent);
-  color: var(--accent-ink);
-  background: var(--accent);
+  border-color: var(--phase-strong, var(--accent));
+  color: var(--ink);
+  background: color-mix(in srgb, var(--phase, var(--accent)) 65%, var(--paper));
+  font-weight: 700;
 }
 .phase-toggle:focus-visible,
 button:focus-visible,
@@ -280,8 +308,9 @@ input:focus-visible {
   display: grid;
   grid-template-columns: 3.5rem minmax(220px, 1fr) minmax(0, 2fr);
   gap: 1rem;
-  padding: 0.85rem 0;
+  padding: 0.85rem 0 0.85rem 0.75rem;
   border-bottom: 1px solid var(--line);
+  border-left: 3px solid var(--phase-strong, var(--line));
   align-items: start;
   min-width: 0;
 }
@@ -376,6 +405,40 @@ th {
   border-bottom: 1px solid var(--line);
 }
 
+.triage-row td:first-child {
+  border-left: 4px solid var(--phase-strong, var(--line));
+  padding-left: 0.6rem;
+}
+
+.dek-note {
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  border-left: 3px solid #f43f5e;
+  background: color-mix(in srgb, #ffe4e6 30%, var(--paper));
+  padding: 0.6rem 0.8rem;
+  max-width: 68ch;
+}
+.removed-row td:first-child {
+  border-left: 4px solid var(--phase-strong);
+  padding-left: 0.6rem;
+}
+.legend-swatch {
+  border-left: 6px solid var(--phase-strong);
+  background: color-mix(in srgb, var(--phase) 40%, var(--paper));
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.removed-badge {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--phase, #ffe4e6) 55%, var(--paper));
+  border: 1px solid var(--phase-strong, #f43f5e);
+  border-radius: 3px;
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+}
+
 /* ---------- index page ---------- */
 .verify-box {
   border-left: 3px solid var(--accent);
@@ -434,4 +497,12 @@ footer.page-footer a { color: var(--muted); }
   }
   #filter-input, .copy-btn, .phase-toggle { background: var(--surface); color: var(--ink); }
   .row:target, .row.flash { background: #2a2612; }
+  .phase-section h2, .legend-swatch, .removed-badge {
+    background: color-mix(in srgb, var(--phase) 22%, var(--surface));
+  }
+  .phase-toggle[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--phase) 30%, var(--surface));
+  }
+  .dek-note { background: color-mix(in srgb, #ffe4e6 15%, var(--surface)); }
+  .removed-badge { background: color-mix(in srgb, var(--phase, #ffe4e6) 20%, var(--surface)); }
 }

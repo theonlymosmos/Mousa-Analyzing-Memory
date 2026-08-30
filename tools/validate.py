@@ -34,21 +34,28 @@ fw_rows = fw_html.count("<tr id=")
 report("framework.html row count == 10", fw_rows == 10, f"found {fw_rows}")
 
 tg_html = (DOCS / "triage.html").read_text(encoding="utf-8")
-tg_rows = len(re.findall(r"<tr><td>", tg_html))
+tg_rows = tg_html.count('class="triage-row"')
 report("triage.html row count == 24", tg_rows == 24, f"found {tg_rows}")
 
 tr_html = (DOCS / "translation.html").read_text(encoding="utf-8")
-tr_rows = tr_html.count("<code>")  # 2 <code> per row (v2, v3)
+tr_rows = len(re.findall(r'<tr[^>]*style="--phase:', tr_html))
 # 77 workbook rows = 70 data rows + 7 section-header rows (see extract.py); both are
 # asserted in extract.py against the workbook itself, so here we check the 70 data rows.
-report("translation.html data row count == 70 (of 77 workbook rows, 7 are section headers)", tr_rows // 2 == 70, f"found {tr_rows // 2}")
+report("translation.html data row count == 70 (of 77 workbook rows, 7 are section headers)", tr_rows == 70, f"found {tr_rows}")
 tr_sections = len(data["translation"])
 report("translation.html section count == 7", tr_sections == 7, f"found {tr_sections}")
+tr_removed_expected = sum(1 for s in data["translation"] for r in s["rows"] if r["v3"] == "(no equivalent)")
+tr_removed_actual = tr_html.count('class="removed-badge"') - 1  # -1 for the legend key's own badge
+report(
+    f"translation.html '(no equivalent)' badge count == {tr_removed_expected}",
+    tr_removed_actual == tr_removed_expected,
+    f"found {tr_removed_actual}",
+)
 
 nt_html = (DOCS / "notes.html").read_text(encoding="utf-8")
 nt_rows = nt_html.count("<td><code>")
 report("notes.html usage-note row count == 16", nt_rows == 16, f"found {nt_rows}")
-legend_rows = nt_html.count("border-left:1rem solid")
+legend_rows = nt_html.count('class="legend-swatch"')
 report("notes.html legend row count == 10", legend_rows == 10, f"found {legend_rows}")
 
 wf_html = (DOCS / "workflow.html").read_text(encoding="utf-8")

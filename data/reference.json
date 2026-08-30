@@ -1844,122 +1844,146 @@
     {
       "area": "Process listing",
       "look_for": "Processes with 0 threads, 0 handles, or a populated Exit time",
-      "why": "They are terminated but still linked in the active list. Not a rootkit finding — a common false lead for beginners."
+      "why": "They are terminated but still linked in the active list. Not a rootkit finding — a common false lead for beginners.",
+      "color": "#E0F2FE"
     },
     {
       "area": "Process listing",
       "look_for": "System (PID 4) and smss.exe with no Session ID",
-      "why": "Expected, not an anomaly: System starts before sessions exist and smss.exe is the session manager itself."
+      "why": "Expected, not an anomaly: System starts before sessions exist and smss.exe is the session manager itself.",
+      "color": "#E0F2FE"
     },
     {
       "area": "Process listing",
       "look_for": "Processes present in psscan but absent from pslist",
-      "why": "Either terminated, or unlinked from the EPROCESS list by DKOM. Check the Exit time before calling it a rootkit."
+      "why": "Either terminated, or unlinked from the EPROCESS list by DKOM. Check the Exit time before calling it a rootkit.",
+      "color": "#E0F2FE"
     },
     {
       "area": "Process listing",
       "look_for": "Processes in pslist but not psscan",
-      "why": "Usually pool memory reuse or a scanning miss — the list view is generally the more reliable of the two for live processes."
+      "why": "Usually pool memory reuse or a scanning miss — the list view is generally the more reliable of the two for live processes.",
+      "color": "#E0F2FE"
     },
     {
       "area": "Process lineage",
       "look_for": "svchost.exe whose parent is not services.exe, or with no -k argument in its command line",
-      "why": "The single highest-yield Windows anomaly. Legitimate svchost is always services-spawned and always has a -k service group."
+      "why": "The single highest-yield Windows anomaly. Legitimate svchost is always services-spawned and always has a -k service group.",
+      "color": "#D1FAE5"
     },
     {
       "area": "Process lineage",
       "look_for": "csrss.exe and wininit.exe showing a PPID that no longer exists",
-      "why": "Normal: their parent smss.exe exits after boot. Orphaned PPID alone is not suspicious for these."
+      "why": "Normal: their parent smss.exe exits after boot. Orphaned PPID alone is not suspicious for these.",
+      "color": "#D1FAE5"
     },
     {
       "area": "Process lineage",
       "look_for": "Office, browser, or Acrobat processes with a shell or script host child",
-      "why": "WINWORD.EXE spawning powershell.exe, cmd.exe or wscript.exe is the classic initial-access pattern."
+      "why": "WINWORD.EXE spawning powershell.exe, cmd.exe or wscript.exe is the classic initial-access pattern.",
+      "color": "#D1FAE5"
     },
     {
       "area": "Image paths",
       "look_for": "A system binary name running from anywhere other than System32 or SysWOW64",
-      "why": "Masquerading is cheap and common. Always compare the path, not just the process name."
+      "why": "Masquerading is cheap and common. Always compare the path, not just the process name.",
+      "color": "#FEF3C7"
     },
     {
       "area": "VAD protections",
       "look_for": "PAGE_NOACCESS in vadinfo output",
-      "why": "vadinfo reports the ORIGINAL protection from the first allocation, not the current one. A region shown as NOACCESS may still be executable now."
+      "why": "vadinfo reports the ORIGINAL protection from the first allocation, not the current one. A region shown as NOACCESS may still be executable now.",
+      "color": "#EDE9FE"
     },
     {
       "area": "malfind",
       "look_for": "RWX private VADs containing an MZ header",
-      "why": "An injected PE. Regions with no MZ but valid-looking instructions are shellcode — disassemble before concluding."
+      "why": "An injected PE. Regions with no MZ but valid-looking instructions are shellcode — disassemble before concluding.",
+      "color": "#F1F5F9"
     },
     {
       "area": "malfind",
       "look_for": "Dozens of RWX hits in browsers, .NET, or Java processes",
-      "why": "JIT compilers allocate RWX legitimately. malfind is a lead generator, not a verdict; correlate with thread start addresses and module backing."
+      "why": "JIT compilers allocate RWX legitimately. malfind is a lead generator, not a verdict; correlate with thread start addresses and module backing.",
+      "color": "#F1F5F9"
     },
     {
       "area": "DLL listing",
       "look_for": "A Wow64 process showing very few DLLs",
-      "why": "The PEB lists are truncated for Wow64. Use windows.malware.ldrmodules instead of dlllist for 32-bit processes on 64-bit systems."
+      "why": "The PEB lists are truncated for Wow64. Use windows.malware.ldrmodules instead of dlllist for 32-bit processes on 64-bit systems.",
+      "color": "#FFE4E6"
     },
     {
       "area": "Threads",
       "look_for": "Thread start addresses that map to no loaded module",
-      "why": "Stronger evidence than malfind alone: code executing from unbacked memory. windows.malware.suspicious_threads automates this check."
+      "why": "Stronger evidence than malfind alone: code executing from unbacked memory. windows.malware.suspicious_threads automates this check.",
+      "color": "#FFEDD5"
     },
     {
       "area": "Network",
       "look_for": "Endpoints whose owning PID does not appear in any process listing",
-      "why": "Either a hidden process or a stale pool artifact. netscan is a scanner, so corrupt and historical entries are expected."
+      "why": "Either a hidden process or a stale pool artifact. netscan is a scanner, so corrupt and historical entries are expected.",
+      "color": "#CFFAFE"
     },
     {
       "area": "Network",
       "look_for": "netscan returning nothing on a busy system",
-      "why": "Try --include-corrupt to relax validation, and cross-check with windows.netstat, which walks live structures instead."
+      "why": "Try --include-corrupt to relax validation, and cross-check with windows.netstat, which walks live structures instead.",
+      "color": "#CFFAFE"
     },
     {
       "area": "Command history",
       "look_for": "cmdscan showing fewer commands than expected",
-      "why": "The default MaxHistory is 50 and is user-configurable via HKCU\\Console\\HistoryBufferSize. Use --max-history and prefer consoles, which returns output as well as input."
+      "why": "The default MaxHistory is 50 and is user-configurable via HKCU\\Console\\HistoryBufferSize. Use --max-history and prefer consoles, which returns output as well as input.",
+      "color": "#FAE8FF"
     },
     {
       "area": "Handles",
       "look_for": "Unusual named mutexes",
-      "why": "Malware families use hardcoded mutex names as single-instance markers — one of the best pivots from a memory image to threat-intel attribution."
+      "why": "Malware families use hardcoded mutex names as single-instance markers — one of the best pivots from a memory image to threat-intel attribution.",
+      "color": "#ECFCCB"
     },
     {
       "area": "Scanning generally",
       "look_for": "Any *scan plugin result",
-      "why": "Scanners find objects in pool memory that may be freed, reused, or partially overwritten. A hit proves the object existed at some point, not that it was live at capture time."
+      "why": "Scanners find objects in pool memory that may be freed, reused, or partially overwritten. A hit proves the object existed at some point, not that it was live at capture time.",
+      "color": "#E0F2FE"
     },
     {
       "area": "Extraction",
       "look_for": "Dumping fails with a paged-out header",
-      "why": "If the page holding the PE header is not resident, pedump and dlllist --dump fail. Fall back to vadinfo --dump and rebuild the header manually."
+      "why": "If the page holding the PE header is not resident, pedump and dlllist --dump fail. Fall back to vadinfo --dump and rebuild the header manually.",
+      "color": "#D1FAE5"
     },
     {
       "area": "Timestamps",
       "look_for": "All plugin timestamps",
-      "why": "Volatility reports UTC. Reconcile against the system time zone before building a timeline or correlating with logs."
+      "why": "Volatility reports UTC. Reconcile against the system time zone before building a timeline or correlating with logs.",
+      "color": "#FEF3C7"
     },
     {
       "area": "Acquisition",
       "look_for": "Structures that contradict each other",
-      "why": "A dump taken over minutes on a live system is not an atomic snapshot. Smear produces genuinely inconsistent structures — do not force a rootkit narrative onto it."
+      "why": "A dump taken over minutes on a live system is not an atomic snapshot. Smear produces genuinely inconsistent structures — do not force a rootkit narrative onto it.",
+      "color": "#EDE9FE"
     },
     {
       "area": "Linux symbols",
       "look_for": "Plugins returning empty tables rather than errors",
-      "why": "A near-match ISF file is worse than none: offsets resolve to garbage and output looks plausible but is wrong. Confirm the banner matches your symbol file exactly."
+      "why": "A near-match ISF file is worse than none: offsets resolve to garbage and output looks plausible but is wrong. Confirm the banner matches your symbol file exactly.",
+      "color": "#F1F5F9"
     },
     {
       "area": "Linux processes",
       "look_for": "Bracketed names in pslist output",
-      "why": "Those are kernel threads. Use --decorate-comm to distinguish kernel threads and user threads before treating one as anomalous."
+      "why": "Those are kernel threads. Use --decorate-comm to distinguish kernel threads and user threads before treating one as anomalous.",
+      "color": "#FFE4E6"
     },
     {
       "area": "Linux modules",
       "look_for": "lsmod output that looks clean",
-      "why": "Clean lsmod means nothing on its own — it is the list a rootkit unlinks from. Run linux.malware.modxview to compare it against carved and sysfs views in one table."
+      "why": "Clean lsmod means nothing on its own — it is the list a rootkit unlinks from. Run linux.malware.modxview to compare it against carved and sysfs views in one table.",
+      "color": "#FFEDD5"
     }
   ],
   "notes": [
@@ -2103,37 +2127,44 @@
         {
           "v2": "imageinfo",
           "v3": "windows.info",
-          "notes": "Volatility 3 has no profiles. windows.info reads the build from symbols instead of guessing, so there is nothing to pass to a --profile flag."
+          "notes": "Volatility 3 has no profiles. windows.info reads the build from symbols instead of guessing, so there is nothing to pass to a --profile flag.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "kdbgscan",
           "v3": "(no equivalent)",
-          "notes": "KDBG guessing existed to fix profile mismatches. Symbol-driven analysis removes the problem; if windows.info works, the kernel was resolved correctly."
+          "notes": "KDBG guessing existed to fix profile mismatches. Symbol-driven analysis removes the problem; if windows.info works, the kernel was resolved correctly.",
+          "color": "#FFE4E6"
         },
         {
           "v2": "kpcrscan",
           "v3": "windows.kpcrs",
-          "notes": "Same data, no scanning needed — the KPCR is located through symbols."
+          "notes": "Same data, no scanning needed — the KPCR is located through symbols.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "crashinfo",
           "v3": "windows.crashinfo",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "hibinfo",
           "v3": "(no equivalent)",
-          "notes": "Hibernation files are handled automatically by the layer stackers; there is no separate info plugin."
+          "notes": "Hibernation files are handled automatically by the layer stackers; there is no separate info plugin.",
+          "color": "#FFE4E6"
         },
         {
           "v2": "imagecopy / raw2dmp",
           "v3": "layerwriter.LayerWriter",
-          "notes": "Writes the resolved layer out as flat raw. Format conversion is now generic rather than per-format."
+          "notes": "Writes the resolved layer out as flat raw. Format conversion is now generic rather than per-format.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "vboxinfo / vmwareinfo / hpakinfo",
           "v3": "(no equivalent)",
-          "notes": "VirtualBox, VMware and HPAK containers are auto-detected and stacked; you no longer inspect or convert them manually."
+          "notes": "VirtualBox, VMware and HPAK containers are auto-detected and stacked; you no longer inspect or convert them manually.",
+          "color": "#FFE4E6"
         }
       ]
     },
@@ -2143,92 +2174,110 @@
         {
           "v2": "pslist",
           "v3": "windows.pslist",
-          "notes": "Direct equivalent. Use --physical for physical offsets (was -P)."
+          "notes": "Direct equivalent. Use --physical for physical offsets (was -P).",
+          "color": "#F8FAFC"
         },
         {
           "v2": "pstree",
           "v3": "windows.pstree",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "psscan",
           "v3": "windows.psscan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "psdispscan",
           "v3": "(no equivalent)",
-          "notes": "DISPATCHER_HEADER scanning was XP-x86 only and unmaintained even in Volatility 2."
+          "notes": "DISPATCHER_HEADER scanning was XP-x86 only and unmaintained even in Volatility 2.",
+          "color": "#FFE4E6"
         },
         {
           "v2": "psxview",
           "v3": "windows.malware.psxview",
-          "notes": "Moved into the .malware namespace along with the rest of the detection plugins."
+          "notes": "Moved into the .malware namespace along with the rest of the detection plugins.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "dlllist",
           "v3": "windows.dlllist",
-          "notes": "Direct equivalent. --pid replaces -p."
+          "notes": "Direct equivalent. --pid replaces -p.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "dlldump",
           "v3": "windows.dlllist --dump",
-          "notes": "No separate dump plugin — dumping is now a flag on the listing plugin. Requires the global -o output directory."
+          "notes": "No separate dump plugin — dumping is now a flag on the listing plugin. Requires the global -o output directory.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "ldrmodules",
           "v3": "windows.malware.ldrmodules",
-          "notes": "Same PEB-vs-VAD cross-view, new namespace."
+          "notes": "Same PEB-vs-VAD cross-view, new namespace.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "handles",
           "v3": "windows.handles",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "getsids",
           "v3": "windows.getsids",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "privs",
           "v3": "windows.privileges",
-          "notes": "Renamed. Class is Privs, module is privileges."
+          "notes": "Renamed. Class is Privs, module is privileges.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "envars",
           "v3": "windows.envars",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "verinfo",
           "v3": "windows.verinfo",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "enumfunc",
           "v3": "windows.iat / windows.pe_symbols",
-          "notes": "Partial. IAT parsing and symbol resolution are split across two plugins; there is no single import/export enumerator."
+          "notes": "Partial. IAT parsing and symbol resolution are split across two plugins; there is no single import/export enumerator.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "threads",
           "v3": "windows.threads",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "thrdscan",
           "v3": "windows.thrdscan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "cmdscan",
           "v3": "windows.cmdscan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "consoles",
           "v3": "windows.consoles",
-          "notes": "Direct equivalent — still the plugin that returns attacker input and output together."
+          "notes": "Direct equivalent — still the plugin that returns attacker input and output together.",
+          "color": "#F8FAFC"
         }
       ]
     },
@@ -2238,52 +2287,62 @@
         {
           "v2": "memmap",
           "v3": "windows.memmap",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "memdump",
           "v3": "windows.memmap --dump",
-          "notes": "Folded into memmap as a flag."
+          "notes": "Folded into memmap as a flag.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "procdump",
           "v3": "windows.pslist --dump",
-          "notes": "Folded into pslist. For a PE at an arbitrary address use windows.pedump --base instead."
+          "notes": "Folded into pslist. For a PE at an arbitrary address use windows.pedump --base instead.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "vadinfo",
           "v3": "windows.vadinfo",
-          "notes": "Direct equivalent. Still reports the ORIGINAL protection, not the current one."
+          "notes": "Direct equivalent. Still reports the ORIGINAL protection, not the current one.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "vadwalk",
           "v3": "windows.vadwalk",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "vadtree",
           "v3": "windows.vadwalk",
-          "notes": "No dedicated tree view and no Graphviz/dot output in Volatility 3."
+          "notes": "No dedicated tree view and no Graphviz/dot output in Volatility 3.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "vaddump",
           "v3": "windows.vadinfo --dump",
-          "notes": "Folded into vadinfo. --maxsize caps oversized regions."
+          "notes": "Folded into vadinfo. --maxsize caps oversized regions.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "malfind",
           "v3": "windows.malware.malfind",
-          "notes": "New namespace, and --dump now extracts the injected regions directly."
+          "notes": "New namespace, and --dump now extracts the injected regions directly.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "evtlogs",
           "v3": "(no equivalent)",
-          "notes": "Parsed XP/2003 binary .evt logs only. For modern .evtx, carve the files with filescan plus dumpfiles and parse them externally."
+          "notes": "Parsed XP/2003 binary .evt logs only. For modern .evtx, carve the files with filescan plus dumpfiles and parse them externally.",
+          "color": "#FFE4E6"
         },
         {
           "v2": "iehistory",
           "v3": "(no equivalent)",
-          "notes": "No browser-history plugin in Volatility 3. Use regex or YARA scanning over process memory instead."
+          "notes": "No browser-history plugin in Volatility 3. Use regex or YARA scanning over process memory instead.",
+          "color": "#FFE4E6"
         }
       ]
     },
@@ -2293,67 +2352,80 @@
         {
           "v2": "modules",
           "v3": "windows.modules",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "modscan",
           "v3": "windows.modscan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "moddump",
           "v3": "windows.modules --dump",
-          "notes": "Folded into modules; --base extracts a single driver."
+          "notes": "Folded into modules; --base extracts a single driver.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "ssdt",
           "v3": "windows.ssdt",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "driverscan",
           "v3": "windows.driverscan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "driverirp",
           "v3": "windows.driverirp",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "filescan",
           "v3": "windows.filescan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "dumpfiles",
           "v3": "windows.dumpfiles",
-          "notes": "Equivalent, but the selector changed: --virtaddr / --physaddr replace -Q, and --filter replaces -r."
+          "notes": "Equivalent, but the selector changed: --virtaddr / --physaddr replace -Q, and --filter replaces -r.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "mutantscan",
           "v3": "windows.mutantscan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "symlinkscan",
           "v3": "windows.symlinkscan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "unloadedmodules",
           "v3": "windows.unloadedmodules",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "apihooks",
           "v3": "(no equivalent)",
-          "notes": "No general IAT/inline hook scanner. The nearest coverage is windows.malware.unhooked_system_calls plus the direct/indirect syscall plugins."
+          "notes": "No general IAT/inline hook scanner. The nearest coverage is windows.malware.unhooked_system_calls plus the direct/indirect syscall plugins.",
+          "color": "#FFE4E6"
         },
         {
           "v2": "impscan",
           "v3": "(no equivalent)",
-          "notes": "No import rebuilding. Dump with pedump and rebuild the IAT in an external tool."
+          "notes": "No import rebuilding. Dump with pedump and rebuild the IAT in an external tool.",
+          "color": "#FFE4E6"
         }
       ]
     },
@@ -2363,12 +2435,14 @@
         {
           "v2": "connections / connscan / sockets / sockscan",
           "v3": "windows.netscan",
-          "notes": "The four XP-era plugins collapsed into one scanner covering TCP and UDP, IPv4 and IPv6, on all supported builds."
+          "notes": "The four XP-era plugins collapsed into one scanner covering TCP and UDP, IPv4 and IPv6, on all supported builds.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "netscan",
           "v3": "windows.netscan",
-          "notes": "Direct equivalent. windows.netstat is the list-walking counterpart."
+          "notes": "Direct equivalent. windows.netstat is the list-walking counterpart.",
+          "color": "#F8FAFC"
         }
       ]
     },
@@ -2378,67 +2452,80 @@
         {
           "v2": "hivelist",
           "v3": "windows.registry.hivelist",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "hivescan",
           "v3": "windows.registry.hivescan",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "printkey",
           "v3": "windows.registry.printkey",
-          "notes": "Direct equivalent. --key takes the path, --offset scopes it to one hive."
+          "notes": "Direct equivalent. --key takes the path, --offset scopes it to one hive.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "hivedump",
           "v3": "windows.registry.printkey --recurse",
-          "notes": "No separate plugin — recursion is a flag."
+          "notes": "No separate plugin — recursion is a flag.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "hashdump",
           "v3": "windows.registry.hashdump",
-          "notes": "Moved under the registry namespace. Needs pycryptodome installed."
+          "notes": "Moved under the registry namespace. Needs pycryptodome installed.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "lsadump",
           "v3": "windows.registry.lsadump",
-          "notes": "Moved under the registry namespace."
+          "notes": "Moved under the registry namespace.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "cachedump",
           "v3": "windows.registry.cachedump",
-          "notes": "Moved under the registry namespace."
+          "notes": "Moved under the registry namespace.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "userassist",
           "v3": "windows.registry.userassist",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "shimcache",
           "v3": "windows.shimcachemem",
-          "notes": "Renamed; reads the ahcache.sys AVL tree rather than the registry hive."
+          "notes": "Renamed; reads the ahcache.sys AVL tree rather than the registry hive.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "getservicesids",
           "v3": "windows.getservicesids",
-          "notes": "Direct equivalent."
+          "notes": "Direct equivalent.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "dumpregistry",
           "v3": "(no equivalent)",
-          "notes": "To recover a hive file, locate it with windows.filescan and extract it with windows.dumpfiles."
+          "notes": "To recover a hive file, locate it with windows.filescan and extract it with windows.dumpfiles.",
+          "color": "#FFE4E6"
         },
         {
           "v2": "shellbags",
           "v3": "(no equivalent)",
-          "notes": "Notable gap. Shellbag parsing has no Volatility 3 plugin — dump NTUSER.DAT / USRCLASS.DAT and parse offline."
+          "notes": "Notable gap. Shellbag parsing has no Volatility 3 plugin — dump NTUSER.DAT / USRCLASS.DAT and parse offline.",
+          "color": "#FFE4E6"
         },
         {
           "v2": "svcscan",
           "v3": "windows.svcscan",
-          "notes": "Direct equivalent, plus windows.svclist and windows.malware.svcdiff for cross-view."
+          "notes": "Direct equivalent, plus windows.svclist and windows.malware.svcdiff for cross-view.",
+          "color": "#F8FAFC"
         }
       ]
     },
@@ -2448,37 +2535,44 @@
         {
           "v2": "mbrparser",
           "v3": "windows.mbrscan",
-          "notes": "Renamed."
+          "notes": "Renamed.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "mftparser",
           "v3": "windows.mftscan.MFTScan",
-          "notes": "Renamed. windows.mftscan.ADS and .ResidentData cover the other two views."
+          "notes": "Renamed. windows.mftscan.ADS and .ResidentData cover the other two views.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "strings",
           "v3": "windows.strings",
-          "notes": "Direct equivalent. Still needs a strings-tool output file passed via --strings-file."
+          "notes": "Direct equivalent. Still needs a strings-tool output file passed via --strings-file.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "timeliner",
           "v3": "timeliner.Timeliner",
-          "notes": "Now OS-independent and lives at the top level, not under windows."
+          "notes": "Now OS-independent and lives at the top level, not under windows.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "volshell",
           "v3": "volshell.py (separate entry point)",
-          "notes": "Shipped as its own script alongside vol.py, not as a plugin. See the Usage Notes sheet."
+          "notes": "Shipped as its own script alongside vol.py, not as a plugin. See the Usage Notes sheet.",
+          "color": "#F8FAFC"
         },
         {
           "v2": "bioskbd / patcher / pagecheck",
           "v3": "(no equivalent)",
-          "notes": "Niche Volatility 2 plugins with no Volatility 3 port."
+          "notes": "Niche Volatility 2 plugins with no Volatility 3 port.",
+          "color": "#FFE4E6"
         },
         {
           "v2": "linux_* / mac_*",
           "v3": "linux.* / mac.*",
-          "notes": "The underscore naming was replaced by dotted namespaces, and Linux profiles were replaced by ISF symbol files built with dwarf2json."
+          "notes": "The underscore naming was replaced by dotted namespaces, and Linux profiles were replaced by ISF symbol files built with dwarf2json.",
+          "color": "#F8FAFC"
         }
       ]
     }

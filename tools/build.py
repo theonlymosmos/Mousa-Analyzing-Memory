@@ -21,6 +21,29 @@ CREDIT_NAME = "Mousa Mohamed"
 REPO_URL = "https://github.com/theonlymosmos/Mousa-Analyzing-Memory"
 XLSX_NAME = "Volatility3_Memory_Analysis_Reference.xlsx"
 
+# The workbook's phase fills are pale Tailwind-100 tints (confirmed by inspecting the
+# actual cell fills) -- good as soft background washes, too washed-out to read as a
+# color once used for a thin rule or a small dot. Pair each with its Tailwind-500
+# sibling for anything that needs to actually register as that color at a glance.
+PHASE_ACCENT = {
+    "#E0F2FE": "#0EA5E9",  # sky
+    "#D1FAE5": "#10B981",  # emerald
+    "#FEF3C7": "#F59E0B",  # amber
+    "#EDE9FE": "#8B5CF6",  # violet
+    "#F1F5F9": "#64748B",  # slate
+    "#FFE4E6": "#F43F5E",  # rose
+    "#FFEDD5": "#F97316",  # orange
+    "#CFFAFE": "#06B6D4",  # cyan
+    "#FAE8FF": "#D946EF",  # fuchsia
+    "#ECFCCB": "#84CC16",  # lime
+}
+
+
+def phase_style(color):
+    strong = PHASE_ACCENT.get(color.upper(), color)
+    return f"--phase:{color};--phase-strong:{strong}"
+
+
 PAGES = [
     ("index.html", "Overview"),
     ("windows.html", "Windows"),
@@ -73,7 +96,10 @@ def phase_spine(phases, active_page):
     items = []
     for p in phases:
         slug = slugify(p["name"])
-        items.append(f'<li><a href="#{slug}">{esc(p["name"])}</a></li>')
+        items.append(
+            f'<li><a href="#{slug}" style="{esc(phase_style(p["color"]))}">'
+            f'<span class="dot"></span>{esc(p["name"])}</a></li>'
+        )
     return f'<ul class="phase-list">\n        {"".join(items)}\n      </ul>'
 
 
@@ -159,7 +185,8 @@ def build_classification_page(page, section, os_label):
 
     toggles = "\n      ".join(
         f'<button class="phase-toggle" type="button" aria-pressed="false" '
-        f'data-phase="{slugify(p["name"])}">{esc(p["name"])}</button>'
+        f'style="{esc(phase_style(p["color"]))}" data-phase="{slugify(p["name"])}">'
+        f'<span class="dot"></span>{esc(p["name"])}</button>'
         for p in phases
     )
 
@@ -169,7 +196,7 @@ def build_classification_page(page, section, os_label):
         rows = rows_by_phase.get(p["name"], [])
         rows_html = "\n      ".join(classification_row(page, r) for r in rows)
         sections_html.append(
-            f"""<section class="phase-section" id="{slug}">
+            f"""<section class="phase-section" id="{slug}" style="{esc(phase_style(p['color']))}">
       <h2>{esc(p['name'])} <span class="phase-count">{len(rows)} plugins</span></h2>
       <div class="rows">
       {rows_html}
@@ -302,7 +329,9 @@ def build_triage(data):
     rows = []
     for r in data["triage"]:
         rows.append(
-            f"<tr><td>{esc(r['area'])}</td><td>{esc(r['look_for'])}</td><td>{esc(r['why'])}</td></tr>"
+            f'<tr class="triage-row" style="{esc(phase_style(r["color"]))}">'
+            f'<td><span class="dot"></span>{esc(r["area"])}</td>'
+            f"<td>{esc(r['look_for'])}</td><td>{esc(r['why'])}</td></tr>"
         )
     body = f"""<table>
       <thead><tr><th>Area</th><th>What to look for</th><th>Why it matters / pitfall</th></tr></thead>
@@ -317,23 +346,32 @@ def build_triage(data):
 def build_translation(data):
     sections = []
     for s in data["translation"]:
-        rows = "\n      ".join(
-            f"<tr><td><code>{esc(r['v2'])}</code></td><td><code>{esc(r['v3'])}</code></td>"
-            f"<td>{esc(r['notes'])}</td></tr>"
-            for r in s["rows"]
-        )
+        rows = []
+        for r in s["rows"]:
+            removed = r["v3"] == "(no equivalent)"
+            row_class = "removed-row" if removed else ""
+            v3_cell = f'<span class="removed-badge">{esc(r["v3"])}</span>' if removed else f"<code>{esc(r['v3'])}</code>"
+            rows.append(
+                f'<tr class="{row_class}" style="{esc(phase_style(r["color"]))}">'
+                f"<td><code>{esc(r['v2'])}</code></td><td>{v3_cell}</td>"
+                f"<td>{esc(r['notes'])}</td></tr>"
+            )
         slug = slugify(s["section"])
         sections.append(
             f"""<h2 id="{slug}">{esc(s['section'])}</h2>
     <table>
       <thead><tr><th>Volatility 2</th><th>Volatility 3</th><th>Notes &amp; differences</th></tr></thead>
       <tbody>
-      {rows}
+      {"".join(rows)}
       </tbody>
     </table>"""
         )
     total = sum(len(s["rows"]) for s in data["translation"])
-    body = "\n    ".join(sections)
+    removed_total = sum(1 for s in data["translation"] for r in s["rows"] if r["v3"] == "(no equivalent)")
+    body = f"""<p class="dek-note"><span class="removed-badge">(no equivalent)</span> marks a Volatility 2
+    command with nothing in Volatility 3 -- {removed_total} of {total}. Everything else has a direct
+    or near-direct replacement.</p>
+    {"".join(sections)}"""
     dek = (
         f"What each Volatility 2 command became in Volatility 3, and what has no replacement. "
         f"{total} commands across {len(data['translation'])} areas, for reading older writeups."
@@ -350,7 +388,8 @@ def build_notes(data):
     for i, leg in enumerate(data["legend"]):
         phase_name = data["windows"]["phases"][i]["name"] if i < len(data["windows"]["phases"]) else leg["phase"]
         legend_rows.append(
-            f'<tr><td style="border-left:1rem solid {esc(leg["color"])}; padding-left:0.6rem">'
+            f'<tr style="{esc(phase_style(leg["color"]))}"><td class="legend-swatch">'
+            f'<span class="dot"></span>'
             f'{esc(leg["phase"])}</td><td>{esc(phase_name)}</td></tr>'
         )
     body = f"""<h2 id="usage-notes">Usage notes</h2>

@@ -165,6 +165,7 @@ def extract_triage_sheet(ws, sheet_name):
         area = ws.cell(row=r, column=1).value
         look_for = ws.cell(row=r, column=2).value
         why = ws.cell(row=r, column=3).value
+        color = cell_fill_hex(ws.cell(row=r, column=1))
         for field_name, val in [
             ("Area", area),
             ("What To Look For", look_for),
@@ -172,7 +173,7 @@ def extract_triage_sheet(ws, sheet_name):
         ]:
             if val is None or (isinstance(val, str) and val.strip() == ""):
                 fail(f"sheet '{sheet_name}' row {r}: empty '{field_name}'")
-        rows.append({"area": area, "look_for": look_for, "why": why})
+        rows.append({"area": area, "look_for": look_for, "why": why, "color": color})
     return rows
 
 
@@ -232,7 +233,8 @@ def extract_translation_sheet(ws, sheet_name):
         ]:
             if val is None or (isinstance(val, str) and val.strip() == ""):
                 fail(f"sheet '{sheet_name}' row {r}: empty '{field_name}'")
-        current["rows"].append({"v2": v2, "v3": v3, "notes": notes})
+        color = cell_fill_hex(ws.cell(row=r, column=1))
+        current["rows"].append({"v2": v2, "v3": v3, "notes": notes, "color": color})
     return sections
 
 
